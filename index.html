@@ -14,7 +14,7 @@
         Sertralina 50mg: JEJUM 30-60min antes PA
 -->
 
-<html lang="pt" style="color-scheme: dark; background:#0f0f0f;">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,12 +24,21 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Plano">
 <meta name="theme-color" content="#0f0f0f">
+<meta name="color-scheme" content="dark">
 <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Plano%20Alimentar%22%2C%22short_name%22%3A%22Plano%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%220f0f0f%22%2C%22theme_color%22%3A%220f0f0f%22%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM4IiBmaWxsPSIjMGYwZjBmIi8+CiAgPHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjE2NCIgaGVpZ2h0PSIxNjQiIHJ4PSIzMiIgZmlsbD0iIzFhMWExYSIvPgogIDwhLS0gR29sZCBhY2NlbnQgYmFyIHRvcCAtLT4KICA8cmVjdCB4PSIyOCIgeT0iMjQiIHdpZHRoPSIxMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IiNjOGI1NjAiLz4KICA8IS0tIExldHRlciBQIC0tPgogIDx0ZXh0IHg9IjkwIiB5PSIxMTgiIGZvbnQtZmFtaWx5PSItYXBwbGUtc3lzdGVtLHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiCiAgICAgICAgZm9udC1zaXplPSI4NiIgZmlsbD0iI2M4YjU2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9Ii0yIj5QPC90ZXh0PgogIDwhLS0gU21hbGwgc3VidGl0bGUgLS0+CiAgPHRleHQgeD0iOTAiIHk9IjE0OCIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjUwMCIKICAgICAgICBmb250LXNpemU9IjE2IiBmaWxsPSIjNmI2YjZiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMyI+UExBTk88L3RleHQ+Cjwvc3ZnPg==">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Plano Alimentar — Tracker v3.5</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+/* ── FORCE DARK THEME ALWAYS ── */
+html, body {
+background: #0f0f0f !important;
+color: #e8e4dc !important;
+color-scheme: dark !important;
+}
+
+@import url(‘https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap’);
 
 :root {
 –bg: #0f0f0f;
@@ -242,7 +251,7 @@ padding-right: 6px;
 .item-check {
 width: 20px; height: 20px;
 border-radius: 5px;
-border: 1.5px solid var(–border-bright);
+border: 2px solid #888888;
 cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 flex-shrink: 0;
