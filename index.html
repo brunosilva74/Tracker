@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+
+<!--
+  TRACKER — PLANO ALIMENTAR BRUNO
+  Versão: 3.1
+  Data: 2026-04-17
+  Histórico:
+    v1.0 — versão inicial
+    v2.0 — recalibrado com medidas reais + défice agressivo
+    v3.0 — coluna "real" editável por item · desvio automático · budget dinâmico para refeições futuras
+    v3.1 — plano calibrado: calorias exactas por dia · iogurte grego gordo · multivitaminico removido
+    v3.2 — sábado: GoldDrink Premium substitui fruta campo + electrólitos · jantar recalibrado
+  NOTA: Plano orientativo — não substitui médico/nutricionista
+        Sertralina 50mg: JEJUM 30-60min antes PA
+-->
+
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plano">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Plano%20Alimentar%22%2C%22short_name%22%3A%22Plano%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%220f0f0f%22%2C%22theme_color%22%3A%220f0f0f%22%7D">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM4IiBmaWxsPSIjMGYwZjBmIi8+CiAgPHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjE2NCIgaGVpZ2h0PSIxNjQiIHJ4PSIzMiIgZmlsbD0iIzFhMWExYSIvPgogIDwhLS0gR29sZCBhY2NlbnQgYmFyIHRvcCAtLT4KICA8cmVjdCB4PSIyOCIgeT0iMjQiIHdpZHRoPSIxMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IiNjOGI1NjAiLz4KICA8IS0tIExldHRlciBQIC0tPgogIDx0ZXh0IHg9IjkwIiB5PSIxMTgiIGZvbnQtZmFtaWx5PSItYXBwbGUtc3lzdGVtLHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiCiAgICAgICAgZm9udC1zaXplPSI4NiIgZmlsbD0iI2M4YjU2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9Ii0yIj5QPC90ZXh0PgogIDwhLS0gU21hbGwgc3VidGl0bGUgLS0+CiAgPHRleHQgeD0iOTAiIHk9IjE0OCIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjUwMCIKICAgICAgICBmb250LXNpemU9IjE2IiBmaWxsPSIjNmI2YjZiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMyI+UExBTk88L3RleHQ+Cjwvc3ZnPg==">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Plano Alimentar — Tracker v3.5</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+–bg: #0f0f0f;
+–surface: #1a1a1a;
+–surface2: #222;
+–surface3: #282828;
+–border: #2e2e2e;
+–border-bright: #3a3a3a;
+–text: #e8e4dc;
+–text-muted: #6b6b6b;
+–text-dim: #444;
+–accent: #c8b560;
+–accent2: #7eb89a;
+–red: #c96b5a;
+–blue: #5a8fc9;
+–purple: #8b6fc9;
+–orange: #c98a5a;
+–green: #6ab87e;
+–mono: ‘DM Mono’, monospace;
+–sans: ‘Syne’, sans-serif;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: var(–sans);
+min-height: 100vh;
+padding: 24px 16px;
+}
+
+/* ── Header ── */
+.header {
+display: flex;
+align-items: flex-end;
+justify-content: space-between;
+margin-bottom: 32px;
+padding-bottom: 20px;
+border-bottom: 1px solid var(–border);
+flex-wrap: wrap;
+gap: 16px;
+}
+.header-left h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: var(–accent); line-height: 1; }
+.header-left p { font-family: var(–mono); font-size: 11px; color: var(–text-muted); margin-top: 6px; letter-spacing: 0.08em; }
+.header-stats { display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap; }
+.stat-pill { text-align: right; }
+.stat-pill .val { font-family: var(–mono); font-size: 20px; font-weight: 500; color: var(–accent2); }
+.stat-pill .lbl { font-family: var(–mono); font-size: 9px; color: var(–text-muted); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-top: 2px; }
+
+/* ── Tabs ── */
+.tabs { display: flex; gap: 2px; margin-bottom: 28px; background: var(–surface); padding: 4px; border-radius: 10px; width: fit-content; }
+.tab { padding: 8px 20px; border-radius: 7px; cursor: pointer; font-family: var(–mono); font-size: 12px; letter-spacing: 0.06em; color: var(–text-muted); border: none; background: transparent; transition: all 0.18s; }
+.tab.active { background: var(–accent); color: #0f0f0f; font-weight: 500; }
+.tab:hover:not(.active) { color: var(–text); }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── Day nav ── */
+.day-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.day-nav button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(–border-bright); background: var(–surface); color: var(–text); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.day-nav button:hover { border-color: var(–accent); color: var(–accent); }
+.day-nav .day-label { font-size: 16px; font-weight: 700; min-width: 0; flex: 1; }
+.day-nav .day-type { font-family: var(–mono); font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
+
+/* ── Budget bar ── */
+.budget-bar {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 14px 20px;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 20px;
+flex-wrap: wrap;
+}
+.budget-item { display: flex; flex-direction: column; gap: 2px; min-width: 80px; }
+.budget-item .b-val { font-family: var(–mono); font-size: 20px; font-weight: 500; }
+.budget-item .b-lbl { font-family: var(–mono); font-size: 9px; color: var(–text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.budget-divider { width: 1px; height: 36px; background: var(–border); }
+.budget-progress { flex: 1; min-width: 160px; }
+.budget-progress .prog-labels { display: flex; justify-content: space-between; font-family: var(–mono); font-size: 10px; color: var(–text-muted); margin-bottom: 5px; }
+.progress-bar { height: 5px; background: var(–border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.35s ease; }
+.progress-fill.ok { background: var(–accent2); }
+.progress-fill.warn { background: var(–accent); }
+.progress-fill.over { background: var(–red); }
+
+/* ── Meal grid ── */
+.daily-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 720px) { .daily-grid { grid-template-columns: 1fr; } }
+
+.meal-card { background: var(–surface); border: 1px solid var(–border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+.meal-card:hover { border-color: var(–border-bright); }
+/* Past meal = slightly dimmed border */
+.meal-card.past { border-color: var(–border); opacity: 0.85; }
+/* Future meal = highlighted budget */
+.meal-card.future { border-color: var(–border); }
+
+.meal-card-header {
+padding: 10px 14px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+border-bottom: 1px solid var(–border);
+gap: 8px;
+}
+.meal-header-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.meal-name { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.meal-budget-pill {
+font-family: var(–mono);
+font-size: 10px;
+padding: 2px 8px;
+border-radius: 20px;
+white-space: nowrap;
+border: 1px solid var(–border-bright);
+color: var(–text-muted);
+}
+.meal-budget-pill.adjusted {
+border-color: rgba(200,181,96,0.4);
+color: var(–accent);
+background: rgba(200,181,96,0.06);
+}
+.meal-totals-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.meal-plan-total { font-family: var(–mono); font-size: 11px; color: var(–text-dim); text-decoration: line-through; }
+.meal-real-total { font-family: var(–mono); font-size: 12px; font-weight: 500; }
+.meal-delta { font-family: var(–mono); font-size: 10px; padding: 1px 6px; border-radius: 6px; }
+.meal-delta.plus  { background: rgba(201,107,90,0.15); color: var(–red); }
+.meal-delta.minus { background: rgba(106,184,126,0.15); color: var(–green); }
+.meal-delta.zero  { color: var(–text-dim); }
+
+.meal-card-body { padding: 0; }
+
+/* ── Item row ── */
+.meal-item {
+display: grid;
+grid-template-columns: 1fr auto auto auto;
+align-items: center;
+gap: 0;
+padding: 5px 14px;
+border-bottom: 1px solid var(–border);
+transition: background 0.12s;
+}
+.meal-item:last-child { border-bottom: none; }
+.meal-item:hover { background: var(–surface2); }
+
+.item-name {
+font-size: 12px;
+color: var(–text);
+padding-right: 8px;
+line-height: 1.35;
+}
+.item-name.done { color: var(–text-dim); text-decoration: line-through; }
+
+/* Plan kcal — static */
+.item-plan {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–text-dim);
+text-align: right;
+padding-right: 4px;
+min-width: 38px;
+white-space: nowrap;
+}
+/* Real kcal input */
+.item-real-wrap {
+display: flex;
+align-items: center;
+gap: 3px;
+padding: 0 6px;
+}
+.item-real {
+width: 52px;
+background: var(–surface3);
+border: 1px solid transparent;
+border-radius: 5px;
+padding: 3px 6px;
+color: var(–text);
+font-family: var(–mono);
+font-size: 12px;
+text-align: right;
+outline: none;
+transition: border-color 0.15s, background 0.15s;
+-moz-appearance: textfield;
+}
+.item-real::-webkit-outer-spin-button,
+.item-real::-webkit-inner-spin-button { -webkit-appearance: none; }
+.item-real:focus {
+border-color: var(–accent);
+background: var(–surface2);
+}
+.item-real.has-value { border-color: var(–border-bright); }
+.item-real.over-plan { border-color: rgba(201,107,90,0.4); color: var(–red); }
+.item-real.under-plan { border-color: rgba(106,184,126,0.3); color: var(–green); }
+
+/* Delta badge per item */
+.item-delta {
+font-family: var(–mono);
+font-size: 10px;
+min-width: 34px;
+text-align: right;
+padding-right: 6px;
+}
+.item-delta.pos { color: var(–red); }
+.item-delta.neg { color: var(–green); }
+
+/* Check */
+.item-check {
+width: 20px; height: 20px;
+border-radius: 5px;
+border: 1.5px solid var(–border-bright);
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+transition: all 0.15s;
+background: transparent;
+}
+.item-check.checked { background: var(–accent2); border-color: var(–accent2); }
+.item-check.checked::after { content: ‘✓’; font-size: 11px; color: #0f0f0f; font-weight: 700; }
+
+/* Column headers inside card */
+.meal-col-headers {
+display: grid;
+grid-template-columns: 1fr auto auto auto;
+padding: 4px 14px;
+border-bottom: 1px solid var(–border);
+background: var(–surface2);
+}
+.meal-col-headers span {
+font-family: var(–mono);
+font-size: 9px;
+color: var(–text-dim);
+text-transform: uppercase;
+letter-spacing: 0.07em;
+}
+.meal-col-headers .ch-plan  { text-align: right; padding-right: 4px; min-width: 38px; }
+.meal-col-headers .ch-real  { text-align: center; padding: 0 6px; width: 64px; }
+.meal-col-headers .ch-delta { text-align: right; min-width: 34px; padding-right: 6px; }
+.meal-col-headers .ch-done  { min-width: 20px; }
+
+/* Future meal budget notice */
+.future-budget-notice {
+padding: 7px 14px;
+font-family: var(–mono);
+font-size: 11px;
+border-top: 1px solid var(–border);
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+/* ── Notes ── */
+.notes-area { margin-top: 16px; background: var(–surface); border: 1px solid var(–border); border-radius: 12px; padding: 14px 16px; }
+.notes-area label { font-family: var(–mono); font-size: 10px; color: var(–text-muted); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+.notes-area textarea { width: 100%; background: transparent; border: none; color: var(–text); font-family: var(–mono); font-size: 12px; resize: none; outline: none; min-height: 60px; line-height: 1.6; }
+.notes-area textarea::placeholder { color: var(–text-dim); }
+
+/* ── Measurements ── */
+.alert-banner { background: rgba(201,107,90,0.1); border: 1px solid rgba(201,107,90,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-family: var(–mono); font-size: 11px; color: var(–red); letter-spacing: 0.04em; line-height: 1.6; }
+.alert-banner strong { color: var(–text); }
+.meas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .meas-grid { grid-template-columns: 1fr; } }
+.meas-section { background: var(–surface); border: 1px solid var(–border); border-radius: 12px; overflow: hidden; }
+.meas-section-header { padding: 14px 18px; border-bottom: 1px solid var(–border); display: flex; align-items: center; justify-content: space-between; }
+.meas-section-header h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.meas-section-body { padding: 16px 18px; }
+.meas-input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.meas-input-row:last-child { margin-bottom: 0; }
+.meas-label { font-family: var(–mono); font-size: 12px; color: var(–text-muted); min-width: 110px; }
+.meas-input { flex: 1; background: var(–surface2); border: 1px solid var(–border); border-radius: 7px; padding: 7px 12px; color: var(–text); font-family: var(–mono); font-size: 13px; outline: none; transition: border-color 0.15s; max-width: 120px; }
+.meas-input:focus { border-color: var(–accent); }
+.meas-unit { font-family: var(–mono); font-size: 11px; color: var(–text-dim); min-width: 24px; }
+.date-input { background: var(–surface2); border: 1px solid var(–border); border-radius: 7px; padding: 7px 12px; color: var(–text); font-family: var(–mono); font-size: 12px; outline: none; cursor: pointer; transition: border-color 0.15s; }
+.date-input:focus { border-color: var(–accent); }
+.btn-save { background: var(–accent); color: #0f0f0f; border: none; border-radius: 8px; padding: 10px 20px; font-family: var(–mono); font-size: 12px; font-weight: 500; letter-spacing: 0.06em; cursor: pointer; transition: opacity 0.15s; margin-top: 16px; }
+.btn-save:hover { opacity: 0.85; }
+.history-wrap { margin-top: 24px; background: var(–surface); border: 1px solid var(–border); border-radius: 12px; overflow: hidden; }
+.history-header { padding: 14px 18px; border-bottom: 1px solid var(–border); display: flex; justify-content: space-between; align-items: center; }
+.history-header h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.history-table { width: 100%; border-collapse: collapse; font-family: var(–mono); font-size: 12px; }
+.history-table th { padding: 10px 18px; text-align: left; color: var(–text-muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(–border); font-weight: 400; }
+.history-table td { padding: 10px 18px; border-bottom: 1px solid var(–border); color: var(–text); }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: var(–surface2); }
+.delta-pos { color: var(–red); } .delta-neg { color: var(–green); } .delta-zero { color: var(–text-muted); }
+.empty-state { padding: 32px 18px; text-align: center; color: var(–text-dim); font-family: var(–mono); font-size: 12px; }
+.btn-del { background: none; border: none; color: var(–text-dim); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: color 0.15s; }
+.btn-del:hover { color: var(–red); }
+
+/* ── Week ── */
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 24px; }
+@media (max-width: 600px) { .week-grid { gap: 4px; } }
+.week-day-card { background: var(–surface); border: 1px solid var(–border); border-radius: 10px; padding: 10px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.week-day-card:hover { border-color: var(–accent); }
+.week-day-card.active { border-color: var(–accent); background: #1e1c14; }
+.week-day-card .wd-name { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: var(–text-muted); }
+.week-day-card .wd-kcal { font-family: var(–mono); font-size: 14px; margin-top: 4px; }
+.week-day-card .wd-target { font-family: var(–mono); font-size: 9px; color: var(–text-dim); margin-top: 2px; }
+.week-day-card .wd-dot { width: 6px; height: 6px; border-radius: 50%; margin: 6px auto 0; background: var(–border); }
+.week-day-card .wd-dot.complete { background: var(–accent2); }
+.week-day-card .wd-dot.over { background: var(–red); }
+.week-day-card .wd-dot.partial { background: var(–accent); }
+.tag-restrit { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid var(–blue);color:var(–blue);letter-spacing:.05em; }
+.tag-flex    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid var(–orange);color:var(–orange);letter-spacing:.05em; }
+.tag-high    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid var(–green);color:var(–green);letter-spacing:.05em; }
+.tag-golf    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid var(–purple);color:var(–purple);letter-spacing:.05em; }
+
+/* ── Linha de desvio de refeição ─────────────────────────── */
+.meal-deviation-row {
+display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+padding: 4px 10px 4px; margin-top: 1px;
+border-top: 1px dashed var(–border);
+font-family: var(–mono); font-size: 11px;
+background: rgba(0,0,0,0.05); border-radius: 0 0 0 0;
+}
+.meal-dev-label { color: var(–text-muted); min-width: 90px; }
+.meal-dev-plan  { color: var(–text-muted); }
+.meal-dev-sep   { color: var(–border); }
+.meal-dev-real  { font-weight: 600; }
+.meal-dev-delta { font-weight: 700; font-size: 12px; min-width: 60px; text-align: right; }
+.meal-dev-delta.over  { color: var(–red); }
+.meal-dev-delta.under { color: var(–green); }
+.meal-dev-delta.zero  { color: var(–text-muted); }
+.meal-dev-note  { font-size: 10px; font-style: italic; flex: 1 1 100%; padding-left: 90px; }
+.meal-dev-note.warn { color: var(–red); }
+.meal-dev-note.good { color: var(–green); }
+
+/* ── Extras manuais por refeição ─────────────────────────── */
+.meal-extras-section {
+padding: 4px 8px 6px;
+border-top: 1px solid var(–border);
+background: rgba(201,107,90,0.04);
+}
+.meal-extra-item {
+display: flex; align-items: center; gap: 6px;
+padding: 2px 4px 2px 6px; font-size: 11px; font-family: var(–mono);
+border-radius: 3px; margin-bottom: 2px;
+}
+.meal-extra-item .ex-plus { color: var(–red); font-weight: 700; }
+.meal-extra-item .ex-desc { flex: 1; color: var(–text); }
+.meal-extra-item .ex-kcal { font-weight: 600; color: var(–red); min-width: 60px; text-align: right; }
+.meal-extra-item .ex-del  { cursor: pointer; color: var(–text-muted); padding: 0 4px; font-size: 14px; }
+.meal-extra-item .ex-del:hover { color: var(–red); }
+.meal-extra-add {
+display: flex; align-items: center; gap: 5px; margin-top: 3px;
+}
+.ex-input-desc {
+flex: 1; background: var(–bg2); border: 1px solid var(–border);
+border-radius: 4px; padding: 3px 7px; font-size: 11px;
+color: var(–text); font-family: var(–mono); min-width: 0;
+}
+.ex-input-desc:focus { outline: none; border-color: var(–red); }
+.ex-input-kcal {
+width: 60px; background: var(–bg2); border: 1px solid var(–border);
+border-radius: 4px; padding: 3px 5px; font-size: 11px; text-align: right;
+color: var(–red); font-family: var(–mono); flex-shrink: 0;
+}
+.ex-input-kcal:focus { outline: none; border-color: var(–red); }
+.ex-input-kcal::-webkit-outer-spin-button,
+.ex-input-kcal::-webkit-inner-spin-button { -webkit-appearance: none; }
+.ex-add-btn {
+background: rgba(201,107,90,0.15); color: var(–red); border: 1px solid rgba(201,107,90,0.3);
+border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer;
+font-family: var(–mono); white-space: nowrap; flex-shrink: 0;
+}
+.ex-add-btn:hover { background: rgba(201,107,90,0.25); }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>PLANO ALIMENTAR</h1>
+    <p>TRACKER v3.5 · 106,8KG → 87KG · TDEE 2482 KCAL · DÉFICE ~780 KCAL/DIA</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">
+      <div class="val" id="hdr-deficit">—</div>
+      <span class="lbl">défice semanal</span>
+    </div>
+    <div class="stat-pill">
+      <div class="val" id="hdr-avg">—</div>
+      <span class="lbl">média kcal</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('diario',event)">Diário</button>
+  <button class="tab" onclick="switchTab('medidas',event)">Medidas</button>
+  <button class="tab" onclick="switchTab('semana',event)">Semana</button>
+</div>
+
+<!-- ═══════ DIÁRIO -->
+
+<div class="panel active" id="panel-diario">
+  <div class="day-nav">
+    <button onclick="prevDay()">‹</button>
+    <div class="day-label" id="day-label">Domingo, 19 Abr</div>
+    <button onclick="nextDay()">›</button>
+    <button onclick="goToday()" style="margin-left:8px;background:rgba(255,255,255,0.1);color:var(--text-muted);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--mono);">hoje</button>
+    <span class="day-type" id="day-type-tag"></span>
+  </div>
+
+  <!-- Budget bar -->
+
+  <div class="budget-bar">
+    <div class="budget-item">
+      <div class="b-val" id="b-target" style="color:var(--text-muted)">—</div>
+      <div class="b-lbl">objectivo</div>
+    </div>
+    <div class="budget-divider"></div>
+    <div class="budget-item">
+      <div class="b-val" id="b-real" style="color:var(--accent)">0</div>
+      <div class="b-lbl">consumidas</div>
+    </div>
+    <div class="budget-item">
+      <div class="b-val" id="b-delta" style="color:var(--text-muted)">—</div>
+      <div class="b-lbl">desvio plano</div>
+    </div>
+    <div class="budget-divider"></div>
+    <div class="budget-item">
+      <div class="b-val" id="b-remaining">—</div>
+      <div class="b-lbl">restante ajust.</div>
+    </div>
+    <div class="budget-item">
+      <div class="b-val" id="b-protein" style="color:var(--blue)">0g</div>
+      <div class="b-lbl">proteína</div>
+    </div>
+    <div class="budget-progress">
+      <div class="prog-labels">
+        <span>progresso real</span>
+        <span id="b-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill ok" id="b-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="daily-grid" id="meals-grid"></div>
+
+  <div class="notes-area">
+    <label>Notas do dia</label>
+    <textarea id="day-notes" placeholder="Convívio, refeição livre, como correu..." rows="2"></textarea>
+  </div>
+</div>
+
+<!-- ═══════ MEDIDAS -->
+
+<div class="panel" id="panel-medidas">
+  <div class="alert-banner">
+    <strong>Medidas base (2026-04-17):</strong> Peso 106,8 kg · Cintura 111 cm · Peito 116 cm · Anca 114 cm · Coxa 69 cm · Braço 35 cm<br>
+    Rácio cintura/anca: <strong>0,97</strong> → risco CV muito alto (alvo &lt;0,90) · IMC: <strong>34,2</strong> · A perder: <strong>19,8 kg</strong>
+  </div>
+  <div class="meas-grid">
+    <div class="meas-section">
+      <div class="meas-section-header">
+        <h3>Nova Medição</h3>
+        <input type="date" class="date-input" id="meas-date">
+      </div>
+      <div class="meas-section-body">
+        <div class="meas-input-row"><span class="meas-label">Peso</span><input class="meas-input" type="number" step="0.1" placeholder="—" id="inp-peso"><span class="meas-unit">kg</span></div>
+        <div class="meas-input-row"><span class="meas-label">Cintura</span><input class="meas-input" type="number" step="0.5" placeholder="—" id="inp-cintura"><span class="meas-unit">cm</span></div>
+        <div class="meas-input-row"><span class="meas-label">Peito</span><input class="meas-input" type="number" step="0.5" placeholder="—" id="inp-peito"><span class="meas-unit">cm</span></div>
+        <div class="meas-input-row"><span class="meas-label">Anca</span><input class="meas-input" type="number" step="0.5" placeholder="—" id="inp-anca"><span class="meas-unit">cm</span></div>
+        <div class="meas-input-row"><span class="meas-label">Coxa (esq.)</span><input class="meas-input" type="number" step="0.5" placeholder="—" id="inp-coxa"><span class="meas-unit">cm</span></div>
+        <div class="meas-input-row"><span class="meas-label">Braço (esq.)</span><input class="meas-input" type="number" step="0.5" placeholder="—" id="inp-braco"><span class="meas-unit">cm</span></div>
+        <button class="btn-save" onclick="saveMeasurement()">Guardar Medição</button>
+      </div>
+    </div>
+    <div class="meas-section">
+      <div class="meas-section-header"><h3>Objectivos v2.0</h3></div>
+      <div class="meas-section-body">
+        <div class="meas-input-row"><span class="meas-label">Peso actual</span><div style="font-family:var(--mono);font-size:18px;color:var(--red)">106,8 kg</div></div>
+        <div class="meas-input-row"><span class="meas-label">Peso alvo</span><div style="font-family:var(--mono);font-size:18px;color:var(--accent2)">87 kg</div></div>
+        <div class="meas-input-row"><span class="meas-label">A perder</span><div style="font-family:var(--mono);font-size:18px;color:var(--text)" id="to-lose">19,8 kg</div></div>
+        <div style="height:1px;background:var(--border);margin:12px 0"></div>
+        <div class="meas-input-row"><span class="meas-label">Cintura actual</span><div style="font-family:var(--mono);font-size:15px;color:var(--red)">111 cm</div></div>
+        <div class="meas-input-row"><span class="meas-label">Cintura alvo</span><div style="font-family:var(--mono);font-size:15px;color:var(--text-muted)">&lt; 94 cm</div></div>
+        <div class="meas-input-row"><span class="meas-label">C/A actual</span><div style="font-family:var(--mono);font-size:15px;color:var(--red)">0,97 ⚠</div></div>
+        <div class="meas-input-row"><span class="meas-label">C/A alvo</span><div style="font-family:var(--mono);font-size:15px;color:var(--accent2)">&lt; 0,90</div></div>
+        <div style="height:1px;background:var(--border);margin:12px 0"></div>
+        <div class="meas-input-row"><span class="meas-label">Ritmo</span><div style="font-family:var(--mono);font-size:15px;color:var(--text-muted)">~2,5–3,0 kg/mês</div></div>
+        <div class="meas-input-row"><span class="meas-label">Prazo est.</span><div style="font-family:var(--mono);font-size:15px;color:var(--text-muted)">~7–8 meses</div></div>
+        <div style="height:1px;background:var(--border);margin:12px 0"></div>
+        <div id="current-stats" style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">Sem medições ainda</div>
+      </div>
+    </div>
+  </div>
+  <div class="history-wrap">
+    <div class="history-header">
+      <h3>Histórico</h3>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)" id="total-entries">0 entradas</span>
+    </div>
+    <table class="history-table">
+      <thead><tr><th>Data</th><th>Peso</th><th>Δ</th><th>Cintura</th><th>C/A</th><th>Peito</th><th>Anca</th><th>Coxa</th><th>Braço</th><th></th></tr></thead>
+      <tbody id="history-body"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state">Sem medições registadas ainda</div>
+  </div>
+</div>
+
+<!-- ═══════ SEMANA -->
+
+<div class="panel" id="panel-semana">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0;">
+    <button onclick="prevWeek()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 14px;font-size:14px;cursor:pointer;">‹ semana</button>
+    <span id="week-label" style="font-family:var(--mono);font-size:12px;color:var(--text-muted);"></span>
+    <button onclick="nextWeek()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 14px;font-size:14px;cursor:pointer;">semana ›</button>
+  </div>
+  <div class="week-grid" id="week-grid"></div>
+  <div class="history-wrap">
+    <div class="history-header">
+      <h3>Registo Semanal</h3>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)" id="week-summary">—</span>
+    </div>
+    <table class="history-table">
+      <thead><tr><th>Dia</th><th>Plano</th><th>Real</th><th>Desvio</th><th>Défice</th><th>%</th><th>Notas</th></tr></thead>
+      <tbody id="week-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// PLANO v3.0 — meal order matters for budget distribution
+// mealOrder defines the sequence used to compute "meals ahead"
+// ─────────────────────────────────────────────────────────────
+const DAYS = [
+  // ── SEGUNDA — RESTRITIVO PROFUNDO — 1650 kcal (calibrado v3.1)
+  {
+    name:'Segunda-Feira', short:'SEG', type:'DEEP', typeTag:'restrit', target:1650,
+    meals:{
+      'Pequeno-Almoço':[
+        {n:'3 ovos mexidos + 5ml azeite',k:255,p:21},
+        {n:'30g aveia + canela',k:114,p:4},
+        {n:'10g linhaça em pó',k:55,p:2},
+        {n:'150ml leite meio-gordo',k:72,p:4},
+      ],
+      'Almoço':[
+        {n:'145g frango grelhado',k:217,p:32},
+        {n:'20g arroz integral cozido',k:26,p:1},
+        {n:'300g legumes vapor (brócolos+espinafres)',k:80,p:5},
+        {n:'10ml azeite EV + alho cru',k:98,p:0},
+      ],
+      'Lanche':[
+        {n:'62g iogurte grego gordo',k:60,p:4},
+        {n:'80g mirtilos',k:46,p:1},
+        {n:'10g sementes abóbora',k:57,p:3},
+        {n:'15g nozes',k:98,p:2},
+      ],
+      'Jantar':[
+        {n:'157g salmão grelhado',k:236,p:33},
+        {n:'300g legumes + 8ml azeite',k:152,p:5},
+        {n:'15g chocolate 85%+',k:83,p:1},
+      ],
+    }
+  },
+  // ── TERÇA — RESTRITIVO PROFUNDO — 1630 kcal
+  {
+    name:'Terça-Feira', short:'TER', type:'DEEP', typeTag:'restrit', target:1630,
+    meals:{
+      'Pequeno-Almoço':[
+        {n:'3 ovos + 1 clara + 5ml azeite',k:235,p:26},
+        {n:'30g aveia + canela',k:114,p:4},
+        {n:'10g linhaça em pó',k:55,p:2},
+        {n:'150ml leite meio-gordo',k:72,p:4},
+        {n:'80g morangos',k:26,p:1},
+      ],
+      'Almoço':[
+        {n:'140g frango / peru grelhado',k:210,p:32},
+        {n:'115g feijão branco cozido',k:127,p:8},
+        {n:'300g legumes (brócolos+couve)',k:80,p:5},
+        {n:'8ml azeite EV + alho',k:72,p:0},
+      ],
+      'Lanche':[
+        {n:'1 fruta média',k:70,p:1},
+      ],
+      'Jantar':[
+        {n:'165g carne magra vaca',k:264,p:41},
+        {n:'300g legumes + 8ml azeite',k:152,p:5},
+        {n:'30g abacate',k:48,p:1},
+        {n:'15g chocolate 85%+',k:83,p:1},
+      ],
+    }
+  },
+  // ── QUARTA — HIGH (treino pesado) — 1950 kcal
+  {
+    name:'Quarta-Feira', short:'QUA', type:'HIGH', typeTag:'high', target:1950,
+    meals:{
+      'Pequeno-Almoço':[
+        {n:'35g aveia + canela',k:133,p:4},
+        {n:'10g linhaça em pó',k:55,p:2},
+        {n:'200ml leite',k:96,p:6},
+        {n:'1 banana (80g)',k:76,p:1},
+        {n:'80g framboesas',k:42,p:1},
+        {n:'20g whey em batido',k:82,p:18},
+      ],
+      'Almoço':[
+        {n:'185g frango grelhado',k:278,p:43},
+        {n:'50g arroz integral cozido',k:65,p:2},
+        {n:'300g legumes',k:80,p:5},
+        {n:'10ml azeite EV + alho',k:98,p:0},
+      ],
+      'Lanche':[
+        {n:'125g iogurte grego gordo',k:121,p:8},
+        {n:'1 fruta média',k:70,p:1},
+        {n:'15g nozes',k:98,p:2},
+      ],
+      'Jantar':[
+        {n:'165g carne magra vaca',k:264,p:41},
+        {n:'100g batata-doce',k:86,p:2},
+        {n:'300g legumes + 10ml azeite',k:170,p:5},
+        {n:'20g chocolate 85%+',k:110,p:2},
+      ],
+    }
+  },
+  // ── QUINTA — RESTRITIVO PROFUNDO — 1640 kcal
+  {
+    name:'Quinta-Feira', short:'QUI', type:'DEEP', typeTag:'restrit', target:1640,
+    meals:{
+      'Pequeno-Almoço':[
+        {n:'3 ovos + 5ml azeite',k:255,p:21},
+        {n:'1 fruta média',k:70,p:1},
+        {n:'10g sementes abóbora',k:57,p:3},
+      ],
+      'Almoço':[
+        {n:'150g frango / peixe',k:225,p:35},
+        {n:'90g grão cozido',k:99,p:6},
+        {n:'300g legumes (espinafres+brócolos)',k:80,p:5},
+        {n:'10ml azeite EV + alho',k:98,p:0},
+      ],
+      'Lanche':[
+        {n:'110g iogurte grego gordo',k:107,p:7},
+        {n:'100g morangos',k:32,p:1},
+        {n:'10g linhaça em pó',k:55,p:2},
+      ],
+      'Jantar':[
+        {n:'163g peixe gordo (cavala/sardinha)',k:245,p:33},
+        {n:'300g legumes + 8ml azeite',k:152,p:5},
+        {n:'30g abacate',k:48,p:1},
+        {n:'15g chocolate 85%+',k:83,p:1},
+      ],
+    }
+  },
+  // ── SEXTA — FLEX controlado — 1780 kcal
+  {
+    name:'Sexta-Feira', short:'SEX', type:'FLEX', typeTag:'flex', target:1780,
+    meals:{
+      'Pequeno-Almoço':[
+        {n:'4 ovos + 5ml azeite',k:325,p:28},
+        {n:'20g whey + 150ml leite',k:156,p:20},
+        {n:'10g linhaça em pó',k:55,p:2},
+        {n:'1 fruta',k:70,p:1},
+      ],
+      'Almoço':[
+        {n:'140g peixe gordo',k:210,p:28},
+        {n:'300g legumes (brócolos+alho)',k:80,p:5},
+        {n:'10ml azeite EV',k:90,p:0},
+      ],
+      'Lanche':[
+        {n:'80g iogurte grego gordo',k:78,p:5},
+        {n:'80g mirtilos',k:46,p:1},
+        {n:'10g sementes abóbora',k:57,p:3},
+        {n:'15g nozes',k:98,p:2},
+      ],
+      'Jantar':[
+        {n:'142g peixe gordo',k:213,p:28},
+        {n:'300g legumes + 8ml azeite',k:152,p:5},
+        {n:'25g abacate',k:40,p:0},
+        {n:'20g chocolate 85%+',k:110,p:2},
+      ],
+    }
+  },
+  // ── SÁBADO — GOLF + Flex — 2050 kcal
+  {
+    name:'Sábado', short:'SAB', type:'GOLF', typeTag:'golf', target:2050,
+    meals:{
+      'Pré-Golf (PA)':[
+        {n:'40g aveia + canela',k:152,p:4},
+        {n:'10g linhaça em pó',k:55,p:2},
+        {n:'200ml leite',k:96,p:6},
+        {n:'1 banana grande',k:114,p:1},
+        {n:'30g whey + 200ml leite',k:216,p:28},
+        {n:'20g nozes',k:130,p:3},
+      ],
+      'Campo (HC)':[
+        {n:'B1-9: 35g GoldDrink Premium em 500ml água',k:212,p:3},
+        {n:'B6-7: 1 banana pequena — energia a meio do percurso',k:57,p:1},
+        {n:'B10-18: 35g GoldDrink Premium em 500ml água',k:212,p:3},
+      ],
+      'Jantar':[
+        {n:'30g whey + 200ml leite (ao chegar)',k:216,p:28},
+        {n:'183g salmão grelhado',k:275,p:38},
+        {n:'100g batata-doce',k:86,p:2},
+        {n:'250g legumes + 6ml azeite',k:120,p:4},
+        {n:'20g chocolate 85%+',k:110,p:2},
+      ],
+    }
+  },
+  // ── DOMINGO — FLEX moderado — 1820 kcal
+  {
+    name:'Domingo', short:'DOM', type:'FLEX', typeTag:'flex', target:1820,
+    meals:{
+      'Pequeno-Almoço':[
+        {n:'3 ovos + 5ml azeite',k:255,p:21},
+        {n:'1 fruta média',k:70,p:1},
+        {n:'10g sementes abóbora',k:57,p:3},
+      ],
+      'Almoço':[
+        {n:'160g peixe gordo',k:240,p:32},
+        {n:'155g lentilhas cozidas',k:178,p:14},
+        {n:'150g legumes extra',k:40,p:3},
+        {n:'10ml azeite EV + alho',k:98,p:0},
+      ],
+      'Lanche':[
+        {n:'125g iogurte grego gordo',k:121,p:8},
+        {n:'80g framboesas',k:42,p:1},
+        {n:'10g linhaça em pó',k:55,p:2},
+        {n:'20g nozes',k:130,p:3},
+      ],
+      'Jantar':[
+        {n:'128g peixe gordo',k:192,p:25},
+        {n:'300g legumes + 8ml azeite',k:152,p:5},
+        {n:'50g abacate',k:80,p:1},
+        {n:'20g chocolate 85%+',k:110,p:2},
+      ],
+    }
+  },
+];
+
+const TYPE_COLORS = { restrit:'var(--blue)', high:'var(--green)', flex:'var(--orange)', golf:'var(--purple)' };
+const TYPE_LABELS = { DEEP:'RESTRITIVO PROFUNDO', HIGH:'HIGH — Treino Pesado', FLEX:'FLEX — Controlado', GOLF:'⛳ Golf + Flex' };
+
+// ── State ──
+// ── Date-based navigation ──
+let currentDate = new Date();
+currentDate.setHours(0,0,0,0);
+
+function dateToKey(d) {
+  // Returns "YYYY-MM-DD"
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + day;
+}
+
+function dateToDayIdx(d) {
+  // JS getDay(): 0=Sun,1=Mon,...,6=Sat -> DAYS idx: 0=Mon,...,6=Sun
+  const js = d.getDay();
+  return js === 0 ? 6 : js - 1;
+}
+
+function getMonday(d) {
+  // Returns the Monday of the week containing d
+  const dt = new Date(d);
+  dt.setHours(0,0,0,0);
+  const day = dt.getDay(); // 0=Sun
+  const diff = (day === 0) ? -6 : 1 - day;
+  dt.setDate(dt.getDate() + diff);
+  return dt;
+}
+
+const PT_DAYS  = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const PT_SHORT = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const PT_MONTHS= ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function formatDateLabel(d) {
+  const idx = dateToDayIdx(d);
+  return PT_DAYS[idx] + ', ' + d.getDate() + ' ' + PT_MONTHS[d.getMonth()];
+}
+
+function formatDateShort(d) {
+  return d.getDate() + '/' + (d.getMonth()+1);
+}
+
+const KEY_CHECKED = 'tracker_checked_v35';
+const KEY_NOTES   = 'tracker_notes_v35';
+const KEY_REAL    = 'tracker_real_v35';       // stores real kcal per item
+const KEY_MEAS    = 'tracker_measurements_v2';
+const KEY_EXTRAS  = 'tracker_extras_v35';
+
+function loadChecked()      { try { return JSON.parse(localStorage.getItem(KEY_CHECKED)||'{}'); } catch { return {}; } }
+function saveChecked(d)     { try { localStorage.setItem(KEY_CHECKED, JSON.stringify(d)); } catch {} }
+function loadNotes()        { try { return JSON.parse(localStorage.getItem(KEY_NOTES)||'{}'); } catch { return {}; } }
+function saveNotes(d)       { try { localStorage.setItem(KEY_NOTES, JSON.stringify(d)); } catch {} }
+function loadReal()         { try { return JSON.parse(localStorage.getItem(KEY_REAL)||'{}'); } catch { return {}; } }
+function saveReal(d)        { try { localStorage.setItem(KEY_REAL, JSON.stringify(d)); } catch {} }
+function loadMeasurements() { try { return JSON.parse(localStorage.getItem(KEY_MEAS)||'[]'); } catch { return []; } }
+function saveMeasurements(d){ try { localStorage.setItem(KEY_MEAS, JSON.stringify(d)); } catch {} }
+function loadExtras()  { try { return JSON.parse(localStorage.getItem(KEY_EXTRAS)||'{}'); } catch { return {}; } }
+function saveExtras(d) { try { localStorage.setItem(KEY_EXTRAS, JSON.stringify(d)); } catch {} }
+
+// ── Core render ──
+function renderDay() {
+  const dayIdx  = dateToDayIdx(currentDate);
+  const d       = DAYS[dayIdx];
+  const dayKey  = dateToKey(currentDate);
+  const checked = loadChecked();
+  const realMap = loadReal();
+  const dayChecked = checked[dayKey] || {};
+  const dayReal    = realMap[dayKey]    || {};
+  const dayExtras  = (loadExtras()[dayKey]) || {};
+
+  // Date label -- same approach as test file
+  const _dias   = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const _meses  = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const _dlbl   = _dias[currentDate.getDay()] + ' ' + currentDate.getDate() + ' ' + _meses[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+  document.getElementById('day-label').textContent = _dlbl;
+  const tag = document.getElementById('day-type-tag');
+  tag.textContent   = TYPE_LABELS[d.type] || d.type;
+  tag.style.borderColor = TYPE_COLORS[d.typeTag];
+  tag.style.color       = TYPE_COLORS[d.typeTag];
+
+  const mealColorMap = {
+    'Pequeno-Almoço':'var(--accent)', 'Pré-Golf (PA)':'var(--accent)',
+    'Almoço':'var(--accent2)', 'Lanche':'var(--blue)',
+    'Campo (HC)':'var(--purple)', 'Pós-Golf':'var(--green)', 'Jantar':'var(--orange)',
+  };
+
+  // ── Compute totals across ALL meals for budget bar ──
+  let totalPlanChecked = 0;   // plan kcal of checked items
+  let totalReal        = 0;   // real kcal entered (or plan if none entered)
+  let totalProtein     = 0;
+
+  const mealKeys = Object.keys(d.meals);
+
+  // First pass: aggregate consumed so far (checked items, real or plan value)
+  mealKeys.forEach(meal => {
+    d.meals[meal].forEach((item, idx) => {
+      const itemKey  = `${meal}_${idx}`;
+      const isChecked = !!dayChecked[itemKey];
+      if (!isChecked) return;
+      const realVal = dayReal[itemKey] !== undefined ? dayReal[itemKey] : item.k;
+      totalReal     += realVal;
+      totalPlanChecked += item.k;
+      totalProtein  += (item.p || 0);
+    });
+  });
+
+  // Plan kcal for NOT-yet-checked items
+  let remainingPlanKcal = 0;
+  mealKeys.forEach(meal => {
+    d.meals[meal].forEach((item, idx) => {
+      const itemKey = `${meal}_${idx}`;
+      if (!dayChecked[itemKey]) remainingPlanKcal += item.k;
+    });
+  });
+
+  // Add extras kcal to totalReal
+  mealKeys.forEach(function(mx) {
+    (dayExtras[mx]||[]).forEach(function(e){ totalReal += (e.k||0); });
+  });
+  // Adjusted budget = target - real consumed so far
+  const adjustedBudget = d.target - totalReal;
+  const totalDelta     = totalReal - totalPlanChecked; // positive = over plan
+
+  updateBudgetBar(totalReal, d.target, adjustedBudget, totalDelta, totalProtein);
+
+  // ── Render meal cards ──
+  const grid = document.getElementById('meals-grid');
+  grid.innerHTML = '';
+
+  mealKeys.forEach(meal => {
+    const items = d.meals[meal];
+    const col   = mealColorMap[meal] || 'var(--text-muted)';
+
+    // Meal-level aggregates
+    let mealPlanTotal = 0, mealRealTotal = 0, mealHasAnyReal = false, mealHasAnyChecked = false;
+    items.forEach((item, idx) => {
+      const itemKey   = `${meal}_${idx}`;
+      const isChecked = !!dayChecked[itemKey];
+      mealPlanTotal  += item.k;
+      if (isChecked) {
+        mealHasAnyChecked = true;
+        const rv = dayReal[itemKey] !== undefined ? dayReal[itemKey] : item.k;
+        mealRealTotal += rv;
+        if (dayReal[itemKey] !== undefined) mealHasAnyReal = true;
+      }
+    });
+
+    // Add extras to meal real total
+    const mealXtras    = (dayExtras[meal] || []);
+    const mealXtraKcal = mealXtras.reduce(function(s,e){ return s+(e.k||0); }, 0);
+    if (mealXtraKcal > 0) { mealRealTotal += mealXtraKcal; mealHasAnyReal = true; }
+    const mealDelta = (mealHasAnyChecked || mealXtraKcal > 0) ? mealRealTotal - mealPlanTotal : null;
+
+    // Budget pill for this meal: how much of the adjusted budget goes here
+    // = meal's plan share of remaining plan kcal × adjusted budget
+    const mealCheckedCount = items.filter((_,i) => !!dayChecked[`${meal}_${i}`]).length;
+    const mealAllChecked   = mealCheckedCount === items.length;
+    const mealPlanUnchecked = items.reduce((s, item, idx) => {
+      return s + (!dayChecked[`${meal}_${idx}`] ? item.k : 0);
+    }, 0);
+
+    // Show adjusted budget for this meal if it has unchecked items
+    let mealBudgetLabel = '';
+    let mealBudgetAdjusted = false;
+    if (mealPlanUnchecked > 0 && remainingPlanKcal > 0) {
+      const share = mealPlanUnchecked / remainingPlanKcal;
+      const mealAdjBudget = Math.round(share * adjustedBudget);
+      if (Math.abs(mealAdjBudget - mealPlanUnchecked) > 5) {
+        mealBudgetLabel   = `budget: ${mealAdjBudget} kcal`;
+        mealBudgetAdjusted = true;
+      } else {
+        mealBudgetLabel   = `${mealPlanUnchecked} kcal`;
+      }
+    } else if (mealAllChecked) {
+      mealBudgetLabel = `${mealRealTotal} kcal`;
+    } else {
+      mealBudgetLabel = `${mealPlanTotal} kcal`;
+    }
+
+    // Meal delta badge
+    let deltaBadge = '';
+    if (mealDelta !== null && mealHasAnyReal) {
+      const cls = mealDelta > 5 ? 'plus' : (mealDelta < -5 ? 'minus' : 'zero');
+      const sign = mealDelta > 0 ? '+' : '';
+      deltaBadge = `<span class="meal-delta ${cls}">${sign}${mealDelta}</span>`;
+    }
+
+    // ── Pre-compute deviation row HTML (outside template literal) ──
+    const devCPlan  = mealPlanTotal;
+    const devCReal  = (mealHasAnyChecked || mealXtraKcal > 0) ? mealRealTotal : null;
+    const devDelta  = devCReal !== null ? devCReal - devCPlan : null;
+    const devCls    = devDelta !== null ? (devDelta > 5 ? 'over' : devDelta < -5 ? 'under' : 'zero') : '';
+    const devSign   = (devDelta !== null && devDelta > 0) ? '+' : '';
+    const devColor  = devDelta !== null ? (devDelta > 5 ? 'var(--red)' : devDelta < -5 ? 'var(--green)' : 'var(--text)') : 'var(--text-muted)';
+    let   devNote   = '';
+    let   devNoteCls = '';
+    if (devDelta !== null && Math.abs(devDelta) > 5) {
+      let fp = 0;
+      const mi = mealKeys.indexOf(meal);
+      for (let j = mi + 1; j < mealKeys.length; j++) {
+        const fm = mealKeys[j];
+        d.meals[fm].forEach(function(fi, ii){ if (!dayChecked[fm+'_'+ii]) fp += fi.k; });
+      }
+      if (fp > 0) {
+        const pct = Math.abs(Math.round(devDelta / fp * 100));
+        if (devDelta > 5) {
+          devNote = 'proximas refeicoes: -' + pct + '% (faltam ' + Math.abs(devDelta) + ' kcal)';
+          devNoteCls = 'warn';
+        } else {
+          devNote = 'proximas refeicoes: +' + pct + '% (sobram ' + Math.abs(devDelta) + ' kcal)';
+          devNoteCls = 'good';
+        }
+      }
+    }
+    const deviationRowHtml = '<div class="meal-deviation-row">'
+      + '<span class="meal-dev-label">total refeicao</span>'
+      + '<span class="meal-dev-plan">plano: ' + devCPlan + ' kcal</span>'
+      + (devCReal !== null ? '<span class="meal-dev-sep">|</span><span class="meal-dev-real" style="color:' + devColor + '">real: ' + devCReal + ' kcal</span>' : '')
+      + (devDelta !== null ? '<span class="meal-dev-delta ' + devCls + '">' + devSign + devDelta + ' kcal</span>' : '')
+      + (devNote ? '<span class="meal-dev-note ' + devNoteCls + '">' + devNote + '</span>' : '')
+      + '</div>';
+
+    // ── Pre-compute extras section HTML ──
+    // Use data-attributes for onclick to avoid quote nesting issues
+    const mealXtraList  = mealXtras;
+    let   extrasItemsHtml = '';
+    mealXtraList.forEach(function(e, ei) {
+      extrasItemsHtml += '<div class="meal-extra-item">'
+        + '<span class="ex-plus">+</span>'
+        + '<span class="ex-desc">' + e.desc + '</span>'
+        + '<span class="ex-kcal">+' + e.k + ' kcal</span>'
+        + '<span class="ex-del" data-day="' + dayKey + '" data-meal="' + meal + '" data-idx="' + ei + '">&#215;</span>'
+        + '</div>';
+    });
+    const mealId = meal.replace(/[^a-zA-Z0-9]/g, '_');
+    const extrasSectionHtml = '<div class="meal-extras-section">'
+      + (extrasItemsHtml ? '<div class="meal-extra-list">' + extrasItemsHtml + '</div>' : '')
+      + '<div class="meal-extra-add">'
+      + '<input class="ex-input-desc" type="text" id="exd_' + mealId + '" placeholder="extra: vinho, sobremesa...">'
+      + '<input class="ex-input-kcal" type="number" id="exk_' + mealId + '" placeholder="kcal" min="1" max="9999">'
+      + '<button class="ex-add-btn" data-day="' + dayKey + '" data-meal="' + meal + '" data-mid="' + mealId + '">+ extra</button>'
+      + '</div></div>';
+
+    const card = document.createElement('div');
+    card.className = 'meal-card';
+    card.innerHTML = `
+      <div class="meal-card-header">
+        <div class="meal-header-left">
+          <div class="meal-name" style="color:${col}">${meal}</div>
+          <div class="meal-budget-pill ${mealBudgetAdjusted?'adjusted':''}">${mealBudgetLabel}</div>
+        </div>
+        <div class="meal-totals-right">
+          ${mealHasAnyReal && mealHasAnyChecked ? `<span class="meal-plan-total">${mealPlanTotal}</span>` : ''}
+          ${mealHasAnyChecked ? `<span class="meal-real-total" style="color:${mealDelta > 5 ? 'var(--red)' : mealDelta < -5 ? 'var(--green)' : 'var(--text)'}">${mealRealTotal}</span>` : ''}
+          ${deltaBadge}
+        </div>
+      </div>
+      <div class="meal-col-headers">
+        <span>alimento</span>
+        <span class="ch-plan">plano</span>
+        <span class="ch-real">real</span>
+        <span class="ch-delta">Δ</span>
+        <span class="ch-done">✓</span>
+      </div>
+      <div class="meal-card-body">
+        ${items.map((item, idx) => {
+          const itemKey   = `${meal}_${idx}`;
+          const isChecked = !!dayChecked[itemKey];
+          const realVal   = dayReal[itemKey] !== undefined ? dayReal[itemKey] : '';
+          const itemDelta = (realVal !== '' && isChecked) ? (parseInt(realVal) - item.k) : null;
+          const deltaStr  = itemDelta !== null ? (itemDelta > 0 ? `+${itemDelta}` : `${itemDelta}`) : '';
+          const deltaCls  = itemDelta !== null ? (itemDelta > 5 ? 'pos' : itemDelta < -5 ? 'neg' : '') : '';
+          const realCls   = realVal !== '' ? (parseInt(realVal) > item.k + 5 ? 'over-plan' : parseInt(realVal) < item.k - 5 ? 'under-plan' : 'has-value') : '';
+          return `<div class="meal-item">
+            <span class="item-name${isChecked?' done':''}">${item.n}</span>
+            <span class="item-plan">${item.k}</span>
+            <div class="item-real-wrap">
+              <input class="item-real ${realCls}"
+                type="number"
+                placeholder="${item.k}"
+                value="${realVal}"
+                min="0" max="9999"
+                onchange="saveRealKcal('${dayKey}','${itemKey}',this.value)"
+                oninput="onRealInput('${dayKey}','${itemKey}',this)"
+                onclick="this.select()"
+              >
+            </div>
+            <span class="item-delta ${deltaCls}">${deltaStr}</span>
+            <div class="item-check ${isChecked?'checked':''}"
+              onclick="toggleItem('${dayKey}','${itemKey}',this)"></div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${deviationRowHtml}`;
+    grid.appendChild(card);
+    card.insertAdjacentHTML('beforeend', extrasSectionHtml);
+  });
+
+  const notes = loadNotes();
+  document.getElementById('day-notes').value = notes[dayKey] || '';
+}
+
+function updateBudgetBar(realConsumed, target, adjustedBudget, delta, protein) {
+  document.getElementById('b-target').textContent  = target;
+  document.getElementById('b-real').textContent    = realConsumed;
+  document.getElementById('b-protein').textContent = (protein||0) + 'g';
+
+  const deltaEl = document.getElementById('b-delta');
+  if (delta === 0 || isNaN(delta)) {
+    deltaEl.textContent = '—';
+    deltaEl.style.color = 'var(--text-muted)';
+  } else {
+    const sign = delta > 0 ? '+' : '';
+    deltaEl.textContent = sign + delta;
+    deltaEl.style.color = delta > 0 ? 'var(--red)' : 'var(--green)';
+  }
+
+  const remEl = document.getElementById('b-remaining');
+  remEl.textContent  = adjustedBudget >= 0 ? adjustedBudget : '+'+Math.abs(adjustedBudget);
+  remEl.style.color  = adjustedBudget >= 0 ? 'var(--accent2)' : 'var(--red)';
+
+  const pct  = target > 0 ? Math.min(Math.round(realConsumed / target * 100), 150) : 0;
+  const fill = document.getElementById('b-fill');
+  fill.style.width = Math.min(pct, 100) + '%';
+  fill.className   = 'progress-fill ' + (pct > 105 ? 'over' : pct > 90 ? 'warn' : 'ok');
+  document.getElementById('b-pct').textContent = pct + '%';
+}
+
+function onRealInput(dayKey, itemKey, input) {
+  const val = input.value.trim();
+  const realMap = loadReal();
+  if (!realMap[dayKey]) realMap[dayKey] = {};
+  if (val === '' || isNaN(parseInt(val))) {
+    delete realMap[dayKey][itemKey];
+  } else {
+    realMap[dayKey][itemKey] = parseInt(val);
+  }
+  saveReal(realMap);
+  renderDay();
+}
+
+function saveRealKcal(dayKey, itemKey, val) {
+  // handled by oninput — this is a fallback for paste/autofill
+  onRealInput(dayKey, itemKey, { value: val });
+}
+
+function toggleItem(dayKey, itemKey, el) {
+  const checked = loadChecked();
+  if (!checked[dayKey]) checked[dayKey] = {};
+  checked[dayKey][itemKey] = !checked[dayKey][itemKey];
+  saveChecked(checked);
+  renderDay();
+}
+
+function prevDay() {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() - 1);
+  currentDate = d;
+  renderDay(); renderWeek();
+}
+function nextDay() {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() + 1);
+  currentDate = d;
+  renderDay(); renderWeek();
+}
+function goToday() {
+  currentDate = new Date();
+  currentDate.setHours(0,0,0,0);
+  renderDay(); renderWeek();
+}
+function prevWeek() {
+  currentDate = new Date(currentDate);
+  currentDate.setDate(currentDate.getDate() - 7);
+  renderDay(); renderWeek();
+}
+function nextWeek() {
+  currentDate = new Date(currentDate);
+  currentDate.setDate(currentDate.getDate() + 7);
+  renderDay(); renderWeek();
+}
+
+document.getElementById('day-notes').addEventListener('input', function() {
+  const notes = loadNotes(); notes[dateToKey(currentDate)] = this.value; saveNotes(notes);
+});
+
+// ── Measurements ──
+document.getElementById('meas-date').value = new Date().toISOString().slice(0,10);
+
+function saveMeasurement() {
+  const date    = document.getElementById('meas-date').value;
+  const peso    = parseFloat(document.getElementById('inp-peso').value)    || null;
+  const cintura = parseFloat(document.getElementById('inp-cintura').value) || null;
+  const peito   = parseFloat(document.getElementById('inp-peito').value)   || null;
+  const anca    = parseFloat(document.getElementById('inp-anca').value)    || null;
+  const coxa    = parseFloat(document.getElementById('inp-coxa').value)    || null;
+  const braco   = parseFloat(document.getElementById('inp-braco').value)   || null;
+  if (!date) return;
+  const meas = loadMeasurements();
+  meas.unshift({ date, peso, cintura, peito, anca, coxa, braco });
+  meas.sort((a,b) => b.date.localeCompare(a.date));
+  saveMeasurements(meas);
+  ['inp-peso','inp-cintura','inp-peito','inp-anca','inp-coxa','inp-braco'].forEach(id => { document.getElementById(id).value = ''; });
+  renderMeasurements();
+}
+
+function deleteMeasurement(idx) {
+  const meas = loadMeasurements(); meas.splice(idx, 1); saveMeasurements(meas); renderMeasurements();
+}
+
+function renderMeasurements() {
+  const meas  = loadMeasurements();
+  const tbody = document.getElementById('history-body');
+  const empty = document.getElementById('empty-state');
+  document.getElementById('total-entries').textContent = meas.length + ' entrada'+(meas.length!==1?'s':'');
+  if (meas.length === 0) { tbody.innerHTML=''; empty.style.display='block'; document.getElementById('current-stats').innerHTML='Sem medições ainda'; return; }
+  empty.style.display = 'none';
+  const BASE = 106.8;
+  const latest = meas[0];
+  const perdido = latest.peso ? (BASE - latest.peso).toFixed(1) : '—';
+  const falta   = latest.peso ? (latest.peso - 87).toFixed(1) : '—';
+  const ca      = (latest.cintura && latest.anca) ? (latest.cintura/latest.anca).toFixed(2) : '—';
+  const caColor = ca !== '—' ? (parseFloat(ca)<0.9?'var(--green)':'var(--red)') : 'var(--text-muted)';
+  document.getElementById('current-stats').innerHTML = `
+    <div style="margin-bottom:6px"><span style="color:var(--text-muted)">Último peso:</span> <span style="color:var(--accent)">${latest.peso?latest.peso+'kg':'—'}</span></div>
+    <div style="margin-bottom:6px"><span style="color:var(--text-muted)">Perdido:</span> <span style="color:var(--green)">${perdido!=='—'?perdido+'kg':'—'}</span></div>
+    <div style="margin-bottom:6px"><span style="color:var(--text-muted)">Falta:</span> <span style="color:var(--accent)">${falta!=='—'?falta+'kg':'—'}</span></div>
+    <div style="margin-bottom:6px"><span style="color:var(--text-muted)">C/A:</span> <span style="color:${caColor}">${ca!=='—'?ca+' '+(parseFloat(ca)<0.9?'✓':'⚠'):'—'}</span></div>
+    ${latest.cintura?`<div><span style="color:var(--text-muted)">Cintura:</span> <span style="${parseFloat(latest.cintura)<94?'color:var(--green)':'color:var(--orange)'}">${latest.cintura}cm ${parseFloat(latest.cintura)<94?'✓':'(alvo <94)'}</span></div>`:''}`;
+  document.getElementById('to-lose').textContent = falta!=='—' ? falta+' kg' : '19,8 kg';
+  tbody.innerHTML = meas.map((m, idx) => {
+    const prev = meas[idx+1];
+    let deltaPeso = '';
+    if (m.peso && prev && prev.peso) {
+      const delta = (m.peso - prev.peso).toFixed(1);
+      deltaPeso = `<span class="${delta>0?'delta-pos':delta<0?'delta-neg':'delta-zero'}">${delta>0?'+':''}${delta}</span>`;
+    }
+    const fmtCm = v => v ? v+'cm' : '—';
+    const ca    = (m.cintura && m.anca) ? (m.cintura/m.anca).toFixed(2) : '—';
+    const caCol = ca !== '—' ? (parseFloat(ca)<0.9?'color:var(--green)':'color:var(--red)') : '';
+    return `<tr>
+      <td>${m.date.split('-').reverse().join('/')}</td>
+      <td>${m.peso?m.peso+'kg':'—'}</td><td>${deltaPeso||'—'}</td>
+      <td>${fmtCm(m.cintura)}</td><td style="${caCol}">${ca}</td>
+      <td>${fmtCm(m.peito)}</td><td>${fmtCm(m.anca)}</td>
+      <td>${fmtCm(m.coxa)}</td><td>${fmtCm(m.braco)}</td>
+      <td><button class="btn-del" onclick="deleteMeasurement(${idx})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Week ──
+function renderWeek() {
+  const checked = loadChecked();
+  const realMap = loadReal();
+  const notes   = loadNotes();
+  const grid    = document.getElementById('week-grid');
+  const tbody   = document.getElementById('week-body');
+  let totalReal=0, totalTarget=0, daysLogged=0;
+
+  // Get Monday of the week containing currentDate
+  const monday = getMonday(currentDate);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const wLabel = document.getElementById('week-label');
+  if (wLabel) wLabel.textContent = monday.getDate() + ' ' + PT_MONTHS[monday.getMonth()] + ' – ' + sunday.getDate() + ' ' + PT_MONTHS[sunday.getMonth()] + ' ' + sunday.getFullYear();
+
+  grid.innerHTML = DAYS.map((d, idx) => {
+    const weekDay = new Date(monday);
+    weekDay.setDate(monday.getDate() + idx);
+    const dayKey     = dateToKey(weekDay);
+    const isToday    = dateToKey(weekDay) === dateToKey(new Date());
+    const isCurrent  = dateToKey(weekDay) === dateToKey(currentDate);
+    const dayChecked = checked[dayKey]||{};
+    const dayReal    = realMap[dayKey]||{};
+    let real=0, plan=0;
+    Object.entries(d.meals).forEach(([meal,items]) => {
+      items.forEach((item,i) => {
+        const ik = `${meal}_${i}`;
+        if (dayChecked[ik]) {
+          real += dayReal[ik] !== undefined ? dayReal[ik] : item.k;
+          plan += item.k;
+        }
+      });
+    });
+    const pct      = d.target>0 ? real/d.target : 0;
+    const dotClass = real===0?'':(pct>1.05?'over':pct>0.95?'complete':'partial');
+    totalReal   += real; totalTarget += d.target;
+    if (real>0) daysLogged++;
+    return `<div class="week-day-card ${isCurrent?'active':''}" onclick="goToDay(${idx})">
+      <div class="wd-name" style="color:${TYPE_COLORS[d.typeTag]}">${d.short}</div>
+      <div class="wd-kcal" style="color:${real>0?(real>d.target?'var(--red)':'var(--accent)'):'var(--text-dim)'}">${real>0?real:'—'}</div>
+      <div class="wd-target">${d.target}</div>
+      <div class="wd-dot ${dotClass}"></div>
+    </div>`;
+  }).join('');
+
+  tbody.innerHTML = DAYS.map((d, idx) => {
+    const weekDay2   = new Date(monday);
+    weekDay2.setDate(monday.getDate() + idx);
+    const dayKey     = dateToKey(weekDay2);
+    const dayChecked = checked[dayKey]||{};
+    const dayReal    = realMap[dayKey]||{};
+    let real=0, planChecked=0;
+    Object.entries(d.meals).forEach(([meal,items]) => {
+      items.forEach((item,i) => {
+        const ik = `${meal}_${i}`;
+        if (dayChecked[ik]) {
+          real += dayReal[ik] !== undefined ? dayReal[ik] : item.k;
+          planChecked += item.k;
+        }
+      });
+    });
+    const deficit  = d.target - real;
+    const delta    = real - planChecked;
+    const pct      = real>0 ? Math.round(real/d.target*100) : 0;
+    const deltaStr = real>0 && delta!==0 ? (delta>0?`<span style="color:var(--red)">+${delta}</span>`:`<span style="color:var(--green)">${delta}</span>`) : '—';
+    return `<tr>
+      <td>${PT_SHORT[idx]}<br><span style='font-size:10px;opacity:0.7'>${weekDay2.getDate()}/${weekDay2.getMonth()+1}</span></td>
+      <td style="font-family:var(--mono)">${d.target}</td>
+      <td style="font-family:var(--mono);color:${real>0?'var(--accent)':'var(--text-dim)'}">${real>0?real:'—'}</td>
+      <td>${deltaStr}</td>
+      <td style="font-family:var(--mono);color:${deficit>=0?'var(--accent2)':'var(--red)'}">${real>0?(deficit>=0?'-'+deficit:'+'+Math.abs(deficit)):'—'}</td>
+      <td style="font-family:var(--mono);color:var(--text-muted)">${pct>0?pct+'%':'—'}</td>
+      <td style="font-size:11px;color:var(--text-muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${notes[dayKey]||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const avg = daysLogged>0 ? Math.round(totalReal/daysLogged) : 0;
+  const weekDef = totalTarget - totalReal;
+  document.getElementById('week-summary').textContent = daysLogged>0 ? `Média real: ${avg} kcal · Défice acum: ${weekDef}` : 'Sem dados';
+  document.getElementById('hdr-avg').textContent     = avg>0?avg:'—';
+  document.getElementById('hdr-deficit').textContent = weekDef>0?weekDef:'—';
+}
+
+function goToDay(idx) {
+  // idx = 0-6 day of week for current week
+  const mon = getMonday(currentDate);
+  currentDate = new Date(mon);
+  currentDate.setDate(mon.getDate() + idx);
+  switchTab('diario', {target: document.querySelectorAll('.tab')[0]});
+  renderDay();
+  renderWeek();
+}
+
+function switchTab(name, e) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  const ev = e||event; if(ev&&ev.target) ev.target.classList.add('active');
+  if(name==='semana')  renderWeek();
+  if(name==='medidas') renderMeasurements();
+}
+
+renderDay(); renderWeek(); renderMeasurements();
+
+
+// ── Desregistar SW antigos ──────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    regs.forEach(function(r){ r.unregister(); });
+  });
+}
+
+// ── Extras: guardar e remover ───────────────────────────
+function addExtraItem(dayKey, meal, mealId) {
+  var descEl = document.getElementById('exd_' + mealId);
+  var kcalEl = document.getElementById('exk_' + mealId);
+  if (!descEl || !kcalEl) { return; }
+  var desc = descEl.value.trim();
+  var kcal = parseInt(kcalEl.value);
+  if (!desc || !kcal || kcal <= 0) { return; }
+  var extras = loadExtras();
+  if (!extras[dayKey]) extras[dayKey] = {};
+  if (!extras[dayKey][meal]) extras[dayKey][meal] = [];
+  extras[dayKey][meal].push({ desc: desc, k: kcal });
+  saveExtras(extras);
+  renderDay();
+}
+
+function removeExtraItem(dayKey, meal, idx) {
+  var extras = loadExtras();
+  if (extras[dayKey] && extras[dayKey][meal]) {
+    extras[dayKey][meal].splice(idx, 1);
+    saveExtras(extras);
+    renderDay();
+  }
+}
+
+// ── Event delegation para extras ───────────────────────
+document.addEventListener('click', function(ev) {
+  var t = ev.target;
+  // Walk up max 3 levels to find the button/del element
+  for (var i = 0; i < 3; i++) {
+    if (!t || t === document.body) break;
+    if (t.classList && t.classList.contains('ex-add-btn')) {
+      addExtraItem(t.dataset.day, t.dataset.meal, t.dataset.mid);
+      return;
+    }
+    if (t.classList && t.classList.contains('ex-del')) {
+      removeExtraItem(t.dataset.day, t.dataset.meal, parseInt(t.dataset.idx));
+      return;
+    }
+    t = t.parentElement;
+  }
+});
+
+// Enter key nos inputs de extra
+document.addEventListener('keydown', function(ev) {
+  if (ev.key !== 'Enter') return;
+  var t = ev.target;
+  if (!t.classList) return;
+  if (t.classList.contains('ex-input-desc') || t.classList.contains('ex-input-kcal')) {
+    var row = t.parentElement;
+    if (row) {
+      var btn = row.querySelector('.ex-add-btn');
+      if (btn) btn.click();
+    }
+  }
+});
+
+</script>
+
+<script>
+</script>
+
+</body>
+</html>
