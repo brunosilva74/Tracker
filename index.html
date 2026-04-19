@@ -92,8 +92,8 @@ gap: 16px;
 
 /* ── Tabs ── */
 .tabs { display: flex; gap: 2px; margin-bottom: 28px; background: var(–surface); padding: 4px; border-radius: 10px; width: fit-content; }
-.tab { padding: 8px 20px; border-radius: 7px; cursor: pointer; font-family: var(–mono); font-size: 12px; letter-spacing: 0.06em; color: var(–text-muted); border: none; background: transparent; transition: all 0.18s; }
-.tab.active { background: var(–accent); color: #0f0f0f; font-weight: 500; }
+.tab { padding: 8px 20px; border-radius: 7px; cursor: pointer; font-family: var(–mono); font-size: 12px; letter-spacing: 0.06em; color: #888888; border: 1px solid #333333; background: #1e1e1e; transition: all 0.18s; }
+.tab.active { background: var(–accent); color: #0f0f0f; font-weight: 700; box-shadow: 0 0 0 2px var(–accent); }
 .tab:hover:not(.active) { color: var(–text); }
 .panel { display: none; }
 .panel.active { display: block; }
@@ -215,12 +215,12 @@ gap: 3px;
 padding: 0 6px;
 }
 .item-real {
-width: 52px;
-background: var(–surface3);
-border: 1px solid transparent;
+width: 58px;
+background: #252525;
+border: 1px solid #444444;
 border-radius: 5px;
-padding: 3px 6px;
-color: var(–text);
+padding: 4px 6px;
+color: #cccccc;
 font-family: var(–mono);
 font-size: 12px;
 text-align: right;
@@ -234,7 +234,7 @@ transition: border-color 0.15s, background 0.15s;
 border-color: var(–accent);
 background: var(–surface2);
 }
-.item-real.has-value { border-color: var(–border-bright); }
+.item-real.has-value { border-color: #666666; color: #c8b560; }
 .item-real.over-plan { border-color: rgba(201,107,90,0.4); color: var(–red); }
 .item-real.under-plan { border-color: rgba(106,184,126,0.3); color: var(–green); }
 
@@ -295,8 +295,8 @@ gap: 6px;
 }
 
 /* ── Notes ── */
-.notes-area { margin-top: 16px; background: var(–surface); border: 1px solid var(–border); border-radius: 12px; padding: 14px 16px; }
-.notes-area label { font-family: var(–mono); font-size: 10px; color: var(–text-muted); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+.notes-area { margin-top: 16px; background: #161616; border: 1px solid #c8b560; border-radius: 12px; padding: 14px 16px; border-left: 3px solid #c8b560; }
+.notes-area label { font-family: var(–mono); font-size: 10px; color: #c8b560; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 8px; }
 .notes-area textarea { width: 100%; background: transparent; border: none; color: var(–text); font-family: var(–mono); font-size: 12px; resize: none; outline: none; min-height: 60px; line-height: 1.6; }
 .notes-area textarea::placeholder { color: var(–text-dim); }
 
@@ -1118,6 +1118,7 @@ function onRealInput(dayKey, itemKey, input) {
   }
   saveReal(realMap);
   renderDay();
+  renderWeek();
 }
 
 function saveRealKcal(dayKey, itemKey, val) {
@@ -1131,6 +1132,7 @@ function toggleItem(dayKey, itemKey, el) {
   checked[dayKey][itemKey] = !checked[dayKey][itemKey];
   saveChecked(checked);
   renderDay();
+  renderWeek();
 }
 
 function prevDay() {
@@ -1254,6 +1256,7 @@ function renderWeek() {
     const dayChecked = checked[dayKey]||{};
     const dayReal    = realMap[dayKey]||{};
     let real=0, plan=0;
+    const wkX = loadExtras()[dayKey] || {};
     Object.entries(d.meals).forEach(([meal,items]) => {
       items.forEach((item,i) => {
         const ik = `${meal}_${i}`;
@@ -1262,6 +1265,7 @@ function renderWeek() {
           plan += item.k;
         }
       });
+      (wkX[meal]||[]).forEach(function(e){ real += (e.k||0); });
     });
     const pct      = d.target>0 ? real/d.target : 0;
     const dotClass = real===0?'':(pct>1.05?'over':pct>0.95?'complete':'partial');
@@ -1282,6 +1286,7 @@ function renderWeek() {
     const dayChecked = checked[dayKey]||{};
     const dayReal    = realMap[dayKey]||{};
     let real=0, planChecked=0;
+    const tbX = loadExtras()[dayKey] || {};
     Object.entries(d.meals).forEach(([meal,items]) => {
       items.forEach((item,i) => {
         const ik = `${meal}_${i}`;
@@ -1290,6 +1295,7 @@ function renderWeek() {
           planChecked += item.k;
         }
       });
+      (tbX[meal]||[]).forEach(function(e){ real += (e.k||0); });
     });
     const deficit  = d.target - real;
     const delta    = real - planChecked;
@@ -1356,6 +1362,7 @@ function addExtraItem(dayKey, meal, mealId) {
   extras[dayKey][meal].push({ desc: desc, k: kcal });
   saveExtras(extras);
   renderDay();
+  renderWeek();
 }
 
 function removeExtraItem(dayKey, meal, idx) {
@@ -1364,6 +1371,7 @@ function removeExtraItem(dayKey, meal, idx) {
     extras[dayKey][meal].splice(idx, 1);
     saveExtras(extras);
     renderDay();
+    renderWeek();
   }
 }
 
