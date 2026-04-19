@@ -1,61 +1,45 @@
 <!DOCTYPE html>
 
-<!--
-  TRACKER — PLANO ALIMENTAR BRUNO
-  Versão: 3.5
-  Data: 2026-04-19
-  Histórico:
-    v1.0 — versão inicial
-    v2.0 — recalibrado com medidas reais + défice agressivo
-    v3.0 — coluna "real" editável por item · desvio automático · budget dinâmico para refeições futuras
-    v3.1 — plano calibrado: calorias exactas por dia · iogurte grego gordo · multivitaminico removido
-    v3.2 — sábado: GoldDrink Premium substitui fruta campo + electrólitos · jantar recalibrado
-  NOTA: Plano orientativo — não substitui médico/nutricionista
-        Sertralina 50mg: JEJUM 30-60min antes PA
--->
-
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Plano">
-<meta name="theme-color" content="#0f0f0f">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="color-scheme" content="dark">
-<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Plano%20Alimentar%22%2C%22short_name%22%3A%22Plano%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%220f0f0f%22%2C%22theme_color%22%3A%220f0f0f%22%7D">
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM4IiBmaWxsPSIjMGYwZjBmIi8+CiAgPHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjE2NCIgaGVpZ2h0PSIxNjQiIHJ4PSIzMiIgZmlsbD0iIzFhMWExYSIvPgogIDwhLS0gR29sZCBhY2NlbnQgYmFyIHRvcCAtLT4KICA8cmVjdCB4PSIyOCIgeT0iMjQiIHdpZHRoPSIxMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IiNjOGI1NjAiLz4KICA8IS0tIExldHRlciBQIC0tPgogIDx0ZXh0IHg9IjkwIiB5PSIxMTgiIGZvbnQtZmFtaWx5PSItYXBwbGUtc3lzdGVtLHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiCiAgICAgICAgZm9udC1zaXplPSI4NiIgZmlsbD0iI2M4YjU2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9Ii0yIj5QPC90ZXh0PgogIDwhLS0gU21hbGwgc3VidGl0bGUgLS0+CiAgPHRleHQgeD0iOTAiIHk9IjE0OCIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjUwMCIKICAgICAgICBmb250LXNpemU9IjE2IiBmaWxsPSIjNmI2YjZiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMyI+UExBTk88L3RleHQ+Cjwvc3ZnPg==">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Plano Alimentar — Tracker v3.5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap');
+
+/* ── RESET & BASE ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
 –bg:      #0a0a0a;
 –bg1:     #111111;
-–bg2:     #161616;
-–bg3:     #1c1c1c;
-–bg4:     #222222;
-–border:  #2a2a2a;
-–border2: #363636;
+–bg2:     #181818;
+–bg3:     #202020;
+–bg4:     #282828;
+–border:  #2c2c2c;
+–border2: #383838;
 –text:    #e8e4dc;
-–text2:   #a09a8e;
-–text3:   #5a5550;
+–text2:   #9a9490;
+–text3:   #4a4540;
 –gold:    #c8b560;
-–gold2:   #a8963e;
 –green:   #6ab87e;
 –red:     #c96b5a;
 –blue:    #5a8fc9;
 –orange:  #c98a5a;
 –purple:  #8b6fc9;
 –teal:    #5ab8b0;
-–mono:    ‘DM Mono’, monospace;
+–mono:    ‘DM Mono’, ‘Courier New’, monospace;
 –sans:    ‘Syne’, sans-serif;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
 background: var(–bg) !important;
@@ -63,152 +47,84 @@ color: var(–text) !important;
 font-family: var(–sans);
 min-height: 100vh;
 -webkit-text-size-adjust: 100%;
-color-scheme: dark;
+overscroll-behavior: none;
 }
 
-/* ── HEADER ──────────────────────────────────────────────── */
+/* ── HEADER ───────────────────────────────────────────── */
 .header {
 background: var(–bg1);
 border-bottom: 1px solid var(–border);
-padding: 16px 20px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-position: sticky;
-top: 0;
-z-index: 100;
+padding: 14px 18px;
+position: sticky; top: 0; z-index: 100;
+display: flex; align-items: center; justify-content: space-between;
 }
 .header h1 {
-font-family: var(–sans);
-font-size: 15px;
-font-weight: 800;
-letter-spacing: 0.15em;
-text-transform: uppercase;
-color: var(–gold);
+font-family: var(–sans); font-size: 14px; font-weight: 800;
+letter-spacing: 0.18em; text-transform: uppercase; color: var(–gold);
 }
-.header p {
-font-family: var(–mono);
-font-size: 10px;
-color: var(–text3);
-letter-spacing: 0.05em;
-margin-top: 2px;
-}
+.header p { font-family: var(–mono); font-size: 9px; color: var(–text3); letter-spacing: 0.05em; margin-top: 2px; }
 .header-left { flex: 1; }
 .header-stats { display: flex; gap: 20px; align-items: center; }
-.stat-pill { text-align: right; }
 .stat-pill .val { font-family: var(–mono); font-size: 18px; font-weight: 500; color: var(–gold); }
-.stat-pill .lbl { font-family: var(–mono); font-size: 9px; color: var(–text3); letter-spacing: 0.08em; text-transform: uppercase; }
+.stat-pill .lbl { font-family: var(–mono); font-size: 8px; color: var(–text3); letter-spacing: 0.1em; text-transform: uppercase; }
 
-/* ── TABS ────────────────────────────────────────────────── */
+/* ── TABS ─────────────────────────────────────────────── */
 .tabs {
-display: flex;
-gap: 4px;
-padding: 10px 16px;
-background: var(–bg1);
-border-bottom: 1px solid var(–border);
+display: flex; gap: 6px; padding: 10px 16px;
+background: var(–bg1); border-bottom: 1px solid var(–border);
 }
 .tab {
-padding: 7px 18px;
-border-radius: 6px;
-cursor: pointer;
-font-family: var(–mono);
-font-size: 11px;
-font-weight: 500;
-letter-spacing: 0.08em;
-text-transform: uppercase;
-color: var(–text3);
-border: 1px solid var(–border);
-background: var(–bg2);
-transition: all 0.15s;
+padding: 6px 16px; border-radius: 7px; cursor: pointer;
+font-family: var(–mono); font-size: 10px; font-weight: 400;
+letter-spacing: 0.1em; text-transform: uppercase;
+color: var(–text3); border: 1px solid var(–border);
+background: var(–bg3); transition: all 0.15s;
 }
-.tab.active {
-background: var(–gold);
-color: #0a0a0a;
-border-color: var(–gold);
-font-weight: 700;
-}
+.tab.active { background: var(–gold); color: #0a0a0a; border-color: var(–gold); font-weight: 700; }
 .tab:hover:not(.active) { color: var(–text2); border-color: var(–border2); }
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* ── DAY NAVIGATION ─────────────────────────────────────── */
-.day-nav {
-display: flex;
-align-items: center;
-gap: 10px;
-padding: 16px 20px 12px;
-flex-wrap: wrap;
-}
+/* ── DAY NAV ──────────────────────────────────────────── */
+.day-nav { display: flex; align-items: center; gap: 10px; padding: 14px 18px 10px; flex-wrap: wrap; }
 .day-nav button {
-background: var(–bg3);
-border: 1px solid var(–border2);
-color: var(–text2);
-border-radius: 8px;
-padding: 6px 14px;
-font-family: var(–mono);
-font-size: 14px;
-cursor: pointer;
-transition: all 0.15s;
+background: var(–bg3); border: 1px solid var(–border2); color: var(–text2);
+border-radius: 8px; padding: 6px 14px; font-size: 16px; cursor: pointer; transition: all 0.15s;
 }
 .day-nav button:hover { border-color: var(–gold); color: var(–gold); }
-.day-label {
-font-family: var(–sans);
-font-size: 18px;
-font-weight: 700;
-color: var(–text);
-flex: 1;
-}
-.day-type {
-font-family: var(–mono);
-font-size: 10px;
-padding: 3px 10px;
-border-radius: 20px;
-border: 1px solid;
-letter-spacing: 0.06em;
-}
+.day-label { font-family: var(–sans); font-size: 20px; font-weight: 700; color: var(–text); flex: 1; }
+.day-type { font-family: var(–mono); font-size: 9px; padding: 3px 10px; border-radius: 20px; border: 1px solid; letter-spacing: 0.06em; }
+.today-btn { font-family: var(–mono) !important; font-size: 10px !important; padding: 5px 12px !important; letter-spacing: 0.08em !important; }
 
-/* ── BUDGET BAR ─────────────────────────────────────────── */
+/* ── BUDGET BAR ───────────────────────────────────────── */
 .budget-bar {
-display: flex;
-align-items: center;
-gap: 16px;
-padding: 14px 20px;
-background: var(–bg1);
-border-bottom: 1px solid var(–border);
-flex-wrap: wrap;
-margin-bottom: 4px;
+display: flex; align-items: center; gap: 14px; padding: 12px 18px;
+background: var(–bg1); border-bottom: 1px solid var(–border);
+margin-bottom: 8px; flex-wrap: wrap;
 }
-.budget-item { display: flex; flex-direction: column; gap: 3px; min-width: 60px; }
+.budget-item { display: flex; flex-direction: column; gap: 3px; min-width: 52px; }
 .budget-item .b-val { font-family: var(–mono); font-size: 22px; font-weight: 600; line-height: 1; }
-.budget-item .b-lbl { font-family: var(–mono); font-size: 9px; color: var(–text3); letter-spacing: 0.08em; text-transform: uppercase; }
+.budget-item .b-lbl { font-family: var(–mono); font-size: 8px; color: var(–text3); letter-spacing: 0.1em; text-transform: uppercase; }
 .budget-divider { width: 1px; height: 36px; background: var(–border); }
-.budget-progress { flex: 1; min-width: 140px; }
-.budget-progress .prog-labels { display: flex; justify-content: space-between; font-family: var(–mono); font-size: 10px; color: var(–text3); margin-bottom: 6px; }
+.budget-progress { flex: 1; min-width: 120px; }
+.budget-progress .prog-labels { display: flex; justify-content: space-between; font-family: var(–mono); font-size: 9px; color: var(–text3); margin-bottom: 5px; }
 .progress-bar { height: 4px; background: var(–bg4); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
 .progress-fill.ok   { background: var(–green); }
 .progress-fill.warn { background: var(–gold); }
 .progress-fill.over { background: var(–red); }
 
-/* ── MEAL CARDS ─────────────────────────────────────────── */
-.daily-grid { padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+/* ── MEAL CARDS ───────────────────────────────────────── */
+.daily-grid { padding: 0 12px 16px; display: flex; flex-direction: column; gap: 10px; }
 
 .meal-card {
-background: var(–bg2);
-border: 1px solid var(–border);
-border-radius: 12px;
-overflow: hidden;
-transition: border-color 0.2s;
+background: var(–bg2); border: 1px solid var(–border);
+border-radius: 14px; overflow: hidden; transition: border-color 0.2s;
 }
-.meal-card:hover { border-color: var(–border2); }
 
 .meal-card-header {
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 11px 16px 9px;
-border-bottom: 1px solid var(–border);
-background: var(–bg3);
+display: flex; align-items: center; justify-content: space-between;
+padding: 11px 16px 9px; border-bottom: 1px solid var(–border); background: var(–bg3);
 }
 .meal-header-left { display: flex; align-items: center; gap: 10px; }
 .meal-name { font-family: var(–sans); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -219,106 +135,71 @@ background: var(–bg3);
 .meal-delta.plus  { background: rgba(201,107,90,0.15); color: var(–red); }
 .meal-delta.minus { background: rgba(106,184,126,0.15); color: var(–green); }
 .meal-delta.zero  { color: var(–text3); }
-
 .meal-budget-pill {
-font-family: var(–mono);
-font-size: 10px;
-color: var(–text3);
-background: var(–bg4);
-border: 1px solid var(–border);
-border-radius: 20px;
-padding: 2px 8px;
-letter-spacing: 0.04em;
+font-family: var(–mono); font-size: 10px; color: var(–text3);
+background: var(–bg4); border: 1px solid var(–border);
+border-radius: 20px; padding: 2px 8px; letter-spacing: 0.04em;
 }
 .meal-budget-pill.adjusted { color: var(–gold); border-color: rgba(200,181,96,0.3); background: rgba(200,181,96,0.08); }
 
-/* ── MEAL ITEMS ─────────────────────────────────────────── */
+/* ── MEAL ITEMS ───────────────────────────────────────── */
 .meal-col-headers {
-display: grid;
-grid-template-columns: 1fr auto auto auto auto;
-padding: 4px 16px;
-border-bottom: 1px solid var(–border);
-background: var(–bg3);
+display: grid; grid-template-columns: 1fr 44px 66px 38px 28px;
+padding: 4px 16px; border-bottom: 1px solid var(–border); background: var(–bg3);
 }
-.meal-col-headers span {
-font-family: var(–mono);
-font-size: 9px;
-color: var(–text3);
-text-transform: uppercase;
-letter-spacing: 0.08em;
-}
-.meal-col-headers .ch-plan  { text-align: right; padding-right: 4px; min-width: 38px; }
-.meal-col-headers .ch-real  { text-align: center; padding: 0 6px; width: 66px; }
-.meal-col-headers .ch-delta { text-align: right; min-width: 34px; padding-right: 6px; }
-.meal-col-headers .ch-done  { min-width: 24px; text-align: center; }
+.meal-col-headers span { font-family: var(–mono); font-size: 8px; color: var(–text3); text-transform: uppercase; letter-spacing: 0.1em; }
+.meal-col-headers .ch-plan  { text-align: right; padding-right: 4px; }
+.meal-col-headers .ch-real  { text-align: center; padding-left: 4px; }
+.meal-col-headers .ch-delta { text-align: right; }
+.meal-col-headers .ch-done  { text-align: center; }
 
 .meal-card-body { padding: 0; }
 
 .meal-item {
-display: grid;
-grid-template-columns: 1fr auto auto auto auto;
-align-items: center;
-gap: 0;
-padding: 8px 16px;
-border-bottom: 1px solid var(–border);
-transition: background 0.1s;
+display: grid; grid-template-columns: 1fr 44px 66px 38px 28px;
+align-items: center; gap: 0; padding: 8px 16px;
+border-bottom: 1px solid var(–border); transition: background 0.1s;
 }
 .meal-item:last-child { border-bottom: none; }
 .meal-item:hover { background: rgba(255,255,255,0.02); }
 
 .item-name { font-size: 13px; color: var(–text); line-height: 1.4; padding-right: 8px; }
 .item-name.done { text-decoration: line-through; color: var(–text3); }
+.item-plan { font-family: var(–mono); font-size: 12px; color: var(–text3); text-align: right; padding-right: 4px; }
 
-.item-plan { font-family: var(–mono); font-size: 12px; color: var(–text3); text-align: right; min-width: 36px; padding-right: 6px; }
-
-.item-real-wrap { padding: 0 6px; }
+.item-real-wrap { padding: 0 4px; }
 .item-real {
-width: 60px;
-background: var(–bg4);
-border: 1px solid var(–border2);
-border-radius: 6px;
-padding: 4px 6px;
-color: var(–text2);
-font-family: var(–mono);
-font-size: 12px;
-text-align: right;
-outline: none;
-transition: border-color 0.15s, background 0.15s;
+width: 100%; background: var(–bg4); border: 1px solid var(–border2);
+border-radius: 6px; padding: 4px 6px; color: var(–text2);
+font-family: var(–mono); font-size: 12px; text-align: right;
+outline: none; transition: border-color 0.15s, background 0.15s;
 -moz-appearance: textfield;
 }
-.item-real::-webkit-outer-spin-button,
-.item-real::-webkit-inner-spin-button { -webkit-appearance: none; }
+.item-real::-webkit-outer-spin-button, .item-real::-webkit-inner-spin-button { -webkit-appearance: none; }
 .item-real:focus { border-color: var(–gold); background: rgba(200,181,96,0.06); color: var(–text); }
 .item-real.has-value { border-color: rgba(200,181,96,0.4); color: var(–gold); }
 .item-real.over-plan  { border-color: rgba(201,107,90,0.4); color: var(–red); }
 .item-real.under-plan { border-color: rgba(106,184,126,0.3); color: var(–green); }
 
-.item-delta { font-family: var(–mono); font-size: 11px; text-align: right; min-width: 36px; padding-right: 6px; }
+.item-delta { font-family: var(–mono); font-size: 11px; text-align: right; padding-right: 4px; }
 .item-delta.pos { color: var(–red); }
 .item-delta.neg { color: var(–green); }
 
 .item-check {
-width: 22px; height: 22px;
-border-radius: 6px;
-border: 2px solid var(–border2);
-cursor: pointer;
+width: 22px; height: 22px; border-radius: 6px;
+border: 2px solid var(–border2); cursor: pointer;
 display: flex; align-items: center; justify-content: center;
-flex-shrink: 0;
-transition: all 0.15s;
-background: var(–bg4);
-margin: 0 auto;
+flex-shrink: 0; transition: all 0.15s; background: var(–bg4);
+margin: 0 auto; font-size: 13px; font-weight: 900; color: #0a0a0a;
 }
 .item-check:active { transform: scale(0.88); }
 .item-check.checked { background: var(–green); border-color: var(–green); }
-.item-check.checked::after { content: ‘✓’; font-size: 13px; color: #0a0a0a; font-weight: 900; line-height: 1; }
 
-/* ── DEVIATION ROW ───────────────────────────────────────── */
+/* ── DEVIATION ROW ────────────────────────────────────── */
 .meal-deviation-row {
 display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-padding: 6px 16px;
-border-top: 1px dashed var(–border2);
-font-family: var(–mono); font-size: 11px;
-background: rgba(255,255,255,0.02);
+padding: 6px 16px; border-top: 1px dashed var(–border2);
+font-family: var(–mono); font-size: 11px; background: rgba(255,255,255,0.015);
 }
 .meal-dev-label { color: var(–text3); min-width: 90px; letter-spacing: 0.04em; }
 .meal-dev-plan  { color: var(–text3); }
@@ -332,92 +213,55 @@ background: rgba(255,255,255,0.02);
 .meal-dev-note.warn { color: var(–red); }
 .meal-dev-note.good { color: var(–green); }
 
-/* ── EXTRAS SECTION ──────────────────────────────────────── */
-.meal-extras-section {
-padding: 6px 12px 8px;
-border-top: 1px solid var(–border);
-background: rgba(201,107,90,0.03);
-}
-.meal-extra-item {
-display: flex; align-items: center; gap: 6px;
-padding: 3px 4px; font-size: 11px; font-family: var(–mono);
-border-radius: 4px; margin-bottom: 2px;
-}
+/* ── EXTRAS ───────────────────────────────────────────── */
+.meal-extras-section { padding: 6px 12px 8px; border-top: 1px solid var(–border); background: rgba(201,107,90,0.03); }
+.meal-extra-item { display: flex; align-items: center; gap: 6px; padding: 3px 4px; font-size: 11px; font-family: var(–mono); border-radius: 4px; margin-bottom: 2px; }
 .meal-extra-item .ex-plus { color: var(–red); font-weight: 700; }
 .meal-extra-item .ex-desc { flex: 1; color: var(–text2); }
 .meal-extra-item .ex-kcal { font-weight: 600; color: var(–red); min-width: 60px; text-align: right; }
 .meal-extra-item .ex-del  { cursor: pointer; color: var(–text3); padding: 0 4px; font-size: 15px; line-height: 1; }
 .meal-extra-item .ex-del:hover { color: var(–red); }
 .meal-extra-add { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.ex-input-desc {
-flex: 1; background: var(–bg4); border: 1px solid var(–border2);
-border-radius: 6px; padding: 5px 8px; font-size: 11px;
-color: var(–text); font-family: var(–mono); min-width: 0;
-}
-.ex-input-desc:focus { outline: none; border-color: var(–red); }
-.ex-input-kcal {
-width: 62px; background: var(–bg4); border: 1px solid var(–border2);
-border-radius: 6px; padding: 5px 6px; font-size: 11px; text-align: right;
-color: var(–red); font-family: var(–mono); flex-shrink: 0;
-}
-.ex-input-kcal:focus { outline: none; border-color: var(–red); }
+.ex-input-desc { flex: 1; background: var(–bg4); border: 1px solid var(–border2); border-radius: 6px; padding: 5px 8px; font-size: 11px; color: var(–text); font-family: var(–mono); min-width: 0; outline: none; }
+.ex-input-desc:focus { border-color: var(–red); }
+.ex-input-kcal { width: 62px; background: var(–bg4); border: 1px solid var(–border2); border-radius: 6px; padding: 5px 6px; font-size: 11px; text-align: right; color: var(–red); font-family: var(–mono); flex-shrink: 0; outline: none; -moz-appearance: textfield; }
 .ex-input-kcal::-webkit-outer-spin-button, .ex-input-kcal::-webkit-inner-spin-button { -webkit-appearance: none; }
-.ex-add-btn {
-background: rgba(201,107,90,0.12); color: var(–red);
-border: 1px solid rgba(201,107,90,0.3);
-border-radius: 6px; padding: 5px 10px; font-size: 11px;
-cursor: pointer; font-family: var(–mono); white-space: nowrap;
-}
+.ex-input-kcal:focus { border-color: var(–red); }
+.ex-add-btn { background: rgba(201,107,90,0.12); color: var(–red); border: 1px solid rgba(201,107,90,0.3); border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; font-family: var(–mono); white-space: nowrap; }
 .ex-add-btn:hover { background: rgba(201,107,90,0.22); }
 
-/* ── DAY TOTAL ───────────────────────────────────────────── */
+/* ── DAY TOTAL ────────────────────────────────────────── */
 .day-total-bar {
-margin: 4px 16px 12px;
-background: rgba(106,184,126,0.08);
-border: 1px solid rgba(106,184,126,0.2);
-border-radius: 8px;
-padding: 10px 16px;
-font-family: var(–mono);
-font-size: 13px;
-font-weight: 600;
-color: var(–green);
-letter-spacing: 0.04em;
+margin: 4px 12px 8px; background: rgba(106,184,126,0.08);
+border: 1px solid rgba(106,184,126,0.2); border-radius: 8px;
+padding: 10px 16px; font-family: var(–mono); font-size: 13px;
+font-weight: 600; color: var(–green); letter-spacing: 0.04em;
 }
 
-/* ── NOTES ───────────────────────────────────────────────── */
+/* ── NOTES ────────────────────────────────────────────── */
 .notes-area {
-margin: 4px 16px 16px;
-background: var(–bg2);
-border: 1px solid var(–border);
-border-left: 3px solid var(–gold);
-border-radius: 10px;
-padding: 12px 16px;
+margin: 4px 12px 16px; background: var(–bg2);
+border: 1px solid var(–border); border-left: 3px solid var(–gold);
+border-radius: 10px; padding: 12px 16px;
 }
-.notes-area label {
-font-family: var(–mono); font-size: 9px; color: var(–gold);
-letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 8px;
-}
-.notes-area textarea {
-width: 100%; background: transparent; border: none; color: var(–text2);
-font-family: var(–mono); font-size: 12px; resize: none; outline: none;
-min-height: 52px; line-height: 1.6;
-}
+.notes-area label { font-family: var(–mono); font-size: 9px; color: var(–gold); letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+.notes-area textarea { width: 100%; background: transparent; border: none; color: var(–text2); font-family: var(–mono); font-size: 12px; resize: none; outline: none; min-height: 48px; line-height: 1.6; }
 .notes-area textarea::placeholder { color: var(–text3); }
 
-/* ── TYPE TAGS ───────────────────────────────────────────── */
-.tag-restrit { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–blue);color:var(–blue);letter-spacing:.05em; }
-.tag-flex    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–orange);color:var(–orange);letter-spacing:.05em; }
-.tag-high    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–green);color:var(–green);letter-spacing:.05em; }
-.tag-golf    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–purple);color:var(–purple);letter-spacing:.05em; }
+/* ── TYPE TAGS ────────────────────────────────────────── */
+.tag-restrit { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–blue);color:var(–blue);letter-spacing:.06em; }
+.tag-flex    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–orange);color:var(–orange);letter-spacing:.06em; }
+.tag-high    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–green);color:var(–green);letter-spacing:.06em; }
+.tag-golf    { display:inline-block;font-family:var(–mono);font-size:9px;padding:2px 8px;border-radius:12px;border:1px solid var(–purple);color:var(–purple);letter-spacing:.06em; }
 
-/* ── MEASUREMENTS ────────────────────────────────────────── */
+/* ── MEASUREMENTS ─────────────────────────────────────── */
 .alert-banner { background:rgba(201,107,90,0.08);border:1px solid rgba(201,107,90,0.25);border-radius:10px;padding:12px 16px;margin:12px 16px;font-family:var(–mono);font-size:11px;color:var(–red);line-height:1.6; }
 .alert-banner strong { color:var(–text); }
 .meas-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px; }
 @media (max-width:700px) { .meas-grid { grid-template-columns:1fr; } }
 .meas-section { background:var(–bg2);border:1px solid var(–border);border-radius:12px;overflow:hidden; }
 .meas-section-header { padding:12px 16px;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;background:var(–bg3); }
-.meas-section-header h3 { font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(–text2); }
+.meas-section-header h3 { font-family:var(–sans);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(–text2); }
 .meas-section-body { padding:14px 16px; }
 .meas-input-row { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
 .meas-input-row:last-child { margin-bottom:0; }
@@ -431,9 +275,9 @@ min-height: 52px; line-height: 1.6;
 .btn-save:hover { opacity:0.88; }
 .history-wrap { margin:12px 16px;background:var(–bg2);border:1px solid var(–border);border-radius:12px;overflow:hidden; }
 .history-header { padding:12px 16px;border-bottom:1px solid var(–border);display:flex;justify-content:space-between;align-items:center;background:var(–bg3); }
-.history-header h3 { font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(–text2); }
+.history-header h3 { font-family:var(–sans);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(–text2); }
 .history-table { width:100%;border-collapse:collapse;font-family:var(–mono);font-size:11px; }
-.history-table th { padding:8px 14px;text-align:left;color:var(–text3);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(–border);font-weight:400; }
+.history-table th { padding:8px 14px;text-align:left;color:var(–text3);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(–border);font-weight:400; }
 .history-table td { padding:8px 14px;border-bottom:1px solid var(–border);color:var(–text2); }
 .history-table tr:last-child td { border-bottom:none; }
 .history-table tr:hover td { background:rgba(255,255,255,0.02); }
@@ -442,9 +286,9 @@ min-height: 52px; line-height: 1.6;
 .btn-del { background:none;border:none;color:var(–text3);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px; }
 .btn-del:hover { color:var(–red); }
 
-/* ── WEEK VIEW ───────────────────────────────────────────── */
+/* ── WEEK VIEW ────────────────────────────────────────── */
 .week-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px 16px 8px; }
-@media (max-width:600px) { .week-grid { gap:4px; } }
+@media (max-width:600px) { .week-grid { gap:3px;padding:10px 10px 6px; } }
 .week-day-card { background:var(–bg2);border:1px solid var(–border);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.15s; }
 .week-day-card:hover { border-color:var(–border2); }
 .week-day-card.active { border-color:var(–gold);background:rgba(200,181,96,0.08); }
@@ -455,27 +299,28 @@ min-height: 52px; line-height: 1.6;
 .week-day-card .wd-dot.complete { background:var(–green); }
 .week-day-card .wd-dot.over { background:var(–red); }
 .week-day-card .wd-dot.partial { background:var(–gold); }
-
-/* ── BUDGET PILL (future meal notice) ────────────────────── */
 .future-budget-notice { padding:6px 16px;font-family:var(–mono);font-size:11px;border-top:1px solid var(–border);display:flex;align-items:center;gap:6px;color:var(–text3); }
-</style>
 
+/* ── FOOTER ───────────────────────────────────────────── */
+.footer-safe { height: 20px; }
+
+</style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <h1>PLANO ALIMENTAR</h1>
-    <p>TRACKER v3.5 · 106,8KG → 87KG · TDEE 2482 KCAL · DÉFICE ~780 KCAL/DIA</p>
+    <h1>Plano Alimentar</h1>
+    <p>TRACKER v3.5 · 2026-04-20 · 106,8KG → 87KG · TDEE 2482 KCAL · DÉFICE ~780 KCAL/DIA</p>
   </div>
   <div class="header-stats">
     <div class="stat-pill">
       <div class="val" id="hdr-deficit">—</div>
-      <span class="lbl">défice semanal</span>
+      <div class="lbl">défice sem.</div>
     </div>
     <div class="stat-pill">
       <div class="val" id="hdr-avg">—</div>
-      <span class="lbl">média kcal</span>
+      <div class="lbl">média kcal</div>
     </div>
   </div>
 </div>
@@ -491,32 +336,30 @@ min-height: 52px; line-height: 1.6;
 <div class="panel active" id="panel-diario">
   <div class="day-nav">
     <button onclick="prevDay()">‹</button>
-    <div class="day-label" id="day-label">Domingo, 19 Abr</div>
+    <div class="day-label" id="day-label">—</div>
     <button onclick="nextDay()">›</button>
-    <button onclick="goToday()" style="margin-left:8px;background:rgba(255,255,255,0.1);color:var(--text-muted);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--mono);">hoje</button>
+    <button class="today-btn" onclick="goToday()">hoje</button>
     <span class="day-type" id="day-type-tag"></span>
   </div>
 
-  <!-- Budget bar -->
-
   <div class="budget-bar">
     <div class="budget-item">
-      <div class="b-val" id="b-target" style="color:var(--text-muted)">—</div>
+      <div class="b-val" id="b-target" style="color:var(--text2)">—</div>
       <div class="b-lbl">objectivo</div>
     </div>
     <div class="budget-divider"></div>
     <div class="budget-item">
-      <div class="b-val" id="b-real" style="color:var(--accent)">0</div>
+      <div class="b-val" id="b-real" style="color:var(--gold)">0</div>
       <div class="b-lbl">consumidas</div>
     </div>
     <div class="budget-item">
-      <div class="b-val" id="b-delta" style="color:var(--text-muted)">—</div>
+      <div class="b-val" id="b-delta" style="color:var(--text2)">—</div>
       <div class="b-lbl">desvio plano</div>
     </div>
     <div class="budget-divider"></div>
     <div class="budget-item">
       <div class="b-val" id="b-remaining">—</div>
-      <div class="b-lbl">restante ajust.</div>
+      <div class="b-lbl">restante</div>
     </div>
     <div class="budget-item">
       <div class="b-val" id="b-protein" style="color:var(--blue)">0g</div>
@@ -568,25 +411,25 @@ min-height: 52px; line-height: 1.6;
       <div class="meas-section-header"><h3>Objectivos v2.0</h3></div>
       <div class="meas-section-body">
         <div class="meas-input-row"><span class="meas-label">Peso actual</span><div style="font-family:var(--mono);font-size:18px;color:var(--red)">106,8 kg</div></div>
-        <div class="meas-input-row"><span class="meas-label">Peso alvo</span><div style="font-family:var(--mono);font-size:18px;color:var(--accent2)">87 kg</div></div>
+        <div class="meas-input-row"><span class="meas-label">Peso alvo</span><div style="font-family:var(--mono);font-size:18px;color:var(--green)">87 kg</div></div>
         <div class="meas-input-row"><span class="meas-label">A perder</span><div style="font-family:var(--mono);font-size:18px;color:var(--text)" id="to-lose">19,8 kg</div></div>
         <div style="height:1px;background:var(--border);margin:12px 0"></div>
         <div class="meas-input-row"><span class="meas-label">Cintura actual</span><div style="font-family:var(--mono);font-size:15px;color:var(--red)">111 cm</div></div>
-        <div class="meas-input-row"><span class="meas-label">Cintura alvo</span><div style="font-family:var(--mono);font-size:15px;color:var(--text-muted)">&lt; 94 cm</div></div>
+        <div class="meas-input-row"><span class="meas-label">Cintura alvo</span><div style="font-family:var(--mono);font-size:15px;color:var(--text3)">&lt; 94 cm</div></div>
         <div class="meas-input-row"><span class="meas-label">C/A actual</span><div style="font-family:var(--mono);font-size:15px;color:var(--red)">0,97 ⚠</div></div>
-        <div class="meas-input-row"><span class="meas-label">C/A alvo</span><div style="font-family:var(--mono);font-size:15px;color:var(--accent2)">&lt; 0,90</div></div>
+        <div class="meas-input-row"><span class="meas-label">C/A alvo</span><div style="font-family:var(--mono);font-size:15px;color:var(--green)">&lt; 0,90</div></div>
         <div style="height:1px;background:var(--border);margin:12px 0"></div>
-        <div class="meas-input-row"><span class="meas-label">Ritmo</span><div style="font-family:var(--mono);font-size:15px;color:var(--text-muted)">~2,5–3,0 kg/mês</div></div>
-        <div class="meas-input-row"><span class="meas-label">Prazo est.</span><div style="font-family:var(--mono);font-size:15px;color:var(--text-muted)">~7–8 meses</div></div>
+        <div class="meas-input-row"><span class="meas-label">Ritmo</span><div style="font-family:var(--mono);font-size:14px;color:var(--text3)">~2,5–3,0 kg/mês</div></div>
+        <div class="meas-input-row"><span class="meas-label">Prazo est.</span><div style="font-family:var(--mono);font-size:14px;color:var(--text3)">~7–8 meses</div></div>
         <div style="height:1px;background:var(--border);margin:12px 0"></div>
-        <div id="current-stats" style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">Sem medições ainda</div>
+        <div id="current-stats" style="font-family:var(--mono);font-size:11px;color:var(--text3)">Sem medições ainda</div>
       </div>
     </div>
   </div>
   <div class="history-wrap">
     <div class="history-header">
       <h3>Histórico</h3>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)" id="total-entries">0 entradas</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="total-entries">0 entradas</span>
     </div>
     <table class="history-table">
       <thead><tr><th>Data</th><th>Peso</th><th>Δ</th><th>Cintura</th><th>C/A</th><th>Peito</th><th>Anca</th><th>Coxa</th><th>Braço</th><th></th></tr></thead>
@@ -599,16 +442,16 @@ min-height: 52px; line-height: 1.6;
 <!-- ═══════ SEMANA -->
 
 <div class="panel" id="panel-semana">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0;">
-    <button onclick="prevWeek()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 14px;font-size:14px;cursor:pointer;">‹ semana</button>
-    <span id="week-label" style="font-family:var(--mono);font-size:12px;color:var(--text-muted);"></span>
-    <button onclick="nextWeek()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 14px;font-size:14px;cursor:pointer;">semana ›</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0;">
+    <button onclick="prevWeek()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:7px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--mono);">‹ semana</button>
+    <span id="week-label" style="font-family:var(--mono);font-size:11px;color:var(--text3);"></span>
+    <button onclick="nextWeek()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:7px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--mono);">semana ›</button>
   </div>
   <div class="week-grid" id="week-grid"></div>
   <div class="history-wrap">
     <div class="history-header">
       <h3>Registo Semanal</h3>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)" id="week-summary">—</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="week-summary">—</span>
     </div>
     <table class="history-table">
       <thead><tr><th>Dia</th><th>Plano</th><th>Real</th><th>Desvio</th><th>Défice</th><th>%</th><th>Notas</th></tr></thead>
@@ -617,11 +460,9 @@ min-height: 52px; line-height: 1.6;
   </div>
 </div>
 
+<div class="footer-safe"></div>
+
 <script>
-// ─────────────────────────────────────────────────────────────
-// PLANO v3.0 — meal order matters for budget distribution
-// mealOrder defines the sequence used to compute "meals ahead"
-// ─────────────────────────────────────────────────────────────
 const DAYS = [
   // ── SEGUNDA — RESTRITIVO PROFUNDO — 1650 kcal (calibrado v3.1)
   {
@@ -1397,28 +1238,31 @@ function switchTab(name, e) {
 }
 
 renderDay(); renderWeek(); renderMeasurements();
+</script>
 
-
-// ── Desregistar SW antigos ──────────────────────────────
+<script>
+// Desregistar SW antigos
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(regs) {
     regs.forEach(function(r){ r.unregister(); });
   });
 }
 
-// ── Extras: guardar e remover ───────────────────────────
+// Extras
 function addExtraItem(dayKey, meal, mealId) {
   var descEl = document.getElementById('exd_' + mealId);
   var kcalEl = document.getElementById('exk_' + mealId);
-  if (!descEl || !kcalEl) { return; }
+  if (!descEl || !kcalEl) return;
   var desc = descEl.value.trim();
   var kcal = parseInt(kcalEl.value);
-  if (!desc || !kcal || kcal <= 0) { return; }
+  if (!desc || !kcal || kcal <= 0) return;
   var extras = loadExtras();
   if (!extras[dayKey]) extras[dayKey] = {};
   if (!extras[dayKey][meal]) extras[dayKey][meal] = [];
   extras[dayKey][meal].push({ desc: desc, k: kcal });
   saveExtras(extras);
+  descEl.value = '';
+  kcalEl.value = '';
   renderDay();
   renderWeek();
 }
@@ -1433,11 +1277,9 @@ function removeExtraItem(dayKey, meal, idx) {
   }
 }
 
-// ── Event delegation para extras ───────────────────────
 document.addEventListener('click', function(ev) {
   var t = ev.target;
-  // Walk up max 3 levels to find the button/del element
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 4; i++) {
     if (!t || t === document.body) break;
     if (t.classList && t.classList.contains('ex-add-btn')) {
       addExtraItem(t.dataset.day, t.dataset.meal, t.dataset.mid);
@@ -1451,23 +1293,15 @@ document.addEventListener('click', function(ev) {
   }
 });
 
-// Enter key nos inputs de extra
 document.addEventListener('keydown', function(ev) {
   if (ev.key !== 'Enter') return;
   var t = ev.target;
   if (!t.classList) return;
   if (t.classList.contains('ex-input-desc') || t.classList.contains('ex-input-kcal')) {
     var row = t.parentElement;
-    if (row) {
-      var btn = row.querySelector('.ex-add-btn');
-      if (btn) btn.click();
-    }
+    if (row) { var btn = row.querySelector('.ex-add-btn'); if (btn) btn.click(); }
   }
 });
-
-</script>
-
-<script>
 </script>
 
 </body>
